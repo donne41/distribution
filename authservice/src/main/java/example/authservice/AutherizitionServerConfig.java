@@ -42,6 +42,7 @@ public class AutherizitionServerConfig {
 
     Logger log = LoggerFactory.getLogger(AutherizitionServerConfig.class);
 
+    //redirect uri must point to bff and be same as the one in bff properties redirect uri
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
         RegisteredClient client = RegisteredClient.withId(UUID.randomUUID().toString())
@@ -75,7 +76,6 @@ public class AutherizitionServerConfig {
 
     @Bean
     public AuthorizationServerSettings authorizationServerSettings(){
-        log.info("MADE NEW AUTH SERVER SETTINGS");
         return AuthorizationServerSettings.builder()
                 .issuer("http://127.0.0.1:9000")
                 .build();
