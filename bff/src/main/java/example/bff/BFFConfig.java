@@ -79,4 +79,20 @@ public class BFFConfig {
                 .filter(tokenRelay())
                 .build();
     }
+
+    @Bean
+    public RouterFunction<ServerResponse> route3(){
+         // /api/test3 -> localhost:8083
+
+        return route()
+                .GET("/api/test3", http())
+                .before(request -> {
+                    LOG.info("Incoming request for route 3 to port 8083");
+                    return request;
+                })
+                .before(uri("http://localhost:8083"))
+                .before(setPath("/api/test"))
+                .filter(tokenRelay())
+                .build();
+    }
 }
