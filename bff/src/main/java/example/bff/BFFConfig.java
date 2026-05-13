@@ -8,6 +8,12 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.ServerResponse;
 
+import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.setPath;
+import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.uri;
+import static org.springframework.cloud.gateway.server.mvc.filter.TokenRelayFilterFunctions.tokenRelay;
+import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions.http;
+import static org.springframework.web.servlet.function.RouterFunctions.route;
+
 @Configuration
 public class BFFConfig {
 
@@ -17,13 +23,22 @@ public class BFFConfig {
         return http
                 .authorizeHttpRequests(auth ->
                         auth.anyRequest().authenticated())
-
+                // enable oauth2 login
                 .oauth2Login(Customizer.withDefaults())
+                //enable tokenRelay Oauth2 client
+                .oauth2Client(Customizer.withDefaults())
                 .build();
     }
 
-//    @Bean
-//    RouterFunction<ServerResponse> router() {
-//return
-//    }
+    @Bean
+    public RouterFunction<ServerResponse> router() {
+        // /api/test -> http://localhost:8081/api/test
+
+        return route()
+                .GET("/api/test", http())
+                .before(uri("http://localhost:8081/"))
+                .before(setPath("/api/test"))
+                .filter(tokenRelay())
+                .build();
+    }
 }
