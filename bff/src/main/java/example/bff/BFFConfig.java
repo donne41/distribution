@@ -8,11 +8,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.servlet.function.RouterFunction;
+import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.function.ServerResponse;
 
 import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.setPath;
 import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.uri;
+import static org.springframework.cloud.gateway.server.mvc.filter.FilterFunctions.stripPrefix;
 import static org.springframework.cloud.gateway.server.mvc.filter.TokenRelayFilterFunctions.tokenRelay;
 import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions.http;
 import static org.springframework.cloud.gateway.server.mvc.handler.GatewayRouterFunctions.route;
@@ -27,12 +31,18 @@ public class BFFConfig {
     @Bean
     SecurityFilterChain security(HttpSecurity http) {
         return http
-                .authorizeHttpRequests(auth ->
-                        auth.anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/chatup/**").permitAll()
+                        .anyRequest().authenticated())
                 // enable oauth2 login
                 .oauth2Login(Customizer.withDefaults())
                 //enable tokenRelay Oauth2 client
                 .oauth2Client(Customizer.withDefaults())
+                // save csrf token for post request from diffrent modules
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+                )
                 .build();
     }
 
@@ -42,7 +52,7 @@ public class BFFConfig {
 
         return route()
                 .GET("/api/test", http())
-                .before( request -> {
+                .before(request -> {
                     LOG.info("Incoming request for route 1 to port 8081");
                     LOG.info("URI before: " + request.uri());
                     return request;
@@ -59,12 +69,12 @@ public class BFFConfig {
     }
 
     @Bean
-    public RouterFunction<ServerResponse> route2(){
+    public RouterFunction<ServerResponse> route2() {
         // /api/test2 -> http://localhost:8082/api/test
 
         return route()
                 .GET("/api/test2", http())
-                .before( request -> {
+                .before(request -> {
                     LOG.info("Incoming request for route 2 to port 8082");
                     LOG.info("URI Before: " + request.uri());
                     return request;
@@ -81,8 +91,8 @@ public class BFFConfig {
     }
 
     @Bean
-    public RouterFunction<ServerResponse> route3(){
-         // /api/test3 -> localhost:8083
+    public RouterFunction<ServerResponse> route3() {
+        // /api/test3 -> localhost:8083
 
         return route()
                 .GET("/api/test3", http())
@@ -95,4 +105,62 @@ public class BFFConfig {
                 .filter(tokenRelay())
                 .build();
     }
+
+    @Bean
+    public RouterFunction<ServerResponse> routeToChat() {
+
+        return route()
+                .GET("/api/chat/**", http())
+                .before(request -> {
+                    LOG.info("Request to ChatAi: {}", request.uri().getPath());
+                    return request;
+                })
+                .before(uri("http://localhost:8090"))
+                .filter(stripPrefix(2))
+                .filter(tokenRelay())
+                .build();
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> routeConfigurationForChat() {
+
+        return route()
+                .GET("/chatup/**", http())
+                .before(request -> {
+                    LOG.info("Request to api");
+                    return request;
+                })
+                .before(uri("http://localhost:8090"))
+                .filter(tokenRelay())
+                .build();
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> routeForPostChat() {
+
+        return route()
+                .POST("/api/v1/chat", http())
+                .before(request -> {
+                    LOG.info("Post from chat ai {}", request.uri().getPath());
+                    return request;
+                })
+                .filter(tokenRelay())
+                .build();
+    }
+
+//    @Bean
+//    public RouterFunction<ServerResponse> routeForPostChat() {
+//
+//        return route()
+//                .POST("/api/v1/chat", http())
+//                .before(request -> {
+//                    LOG.info("Post from chat ai {}", request.uri().getPath());
+//                    return ServerRequest.from(request)
+//                            .headers(headers -> {
+//                                headers.remove("XSRF-TOKEN");
+//                            }).build();
+//                })
+//                .filter(tokenRelay())
+//                .build();
+//    }
 }
