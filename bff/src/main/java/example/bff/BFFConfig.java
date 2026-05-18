@@ -1,6 +1,9 @@
 package example.bff;
 
-import org.slf4j.ILoggerFactory;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -9,10 +12,13 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.function.RouterFunction;
-import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.function.ServerResponse;
+
+import java.io.IOException;
 
 import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.setPath;
 import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.uri;
@@ -44,6 +50,24 @@ public class BFFConfig {
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
                 )
                 .build();
+    }
+
+    //csrf token redering before proxy to service
+    @Bean
+    public OncePerRequestFilter csrfCookieFilter(){
+        return new OncePerRequestFilter(){
+            @Override
+            protected void doFilterInternal(HttpServletRequest request,
+                                            HttpServletResponse response,
+                                            FilterChain filterChain)
+                    throws ServletException, IOException {
+                CsrfToken token = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+                if(token != null){
+                    token.getToken();
+                }
+                filterChain.doFilter(request,response);
+            }
+        };
     }
 
     @Bean
@@ -144,23 +168,8 @@ public class BFFConfig {
                     LOG.info("Post from chat ai {}", request.uri().getPath());
                     return request;
                 })
+                .before(uri("http://localhost:8090"))
                 .filter(tokenRelay())
                 .build();
     }
-
-//    @Bean
-//    public RouterFunction<ServerResponse> routeForPostChat() {
-//
-//        return route()
-//                .POST("/api/v1/chat", http())
-//                .before(request -> {
-//                    LOG.info("Post from chat ai {}", request.uri().getPath());
-//                    return ServerRequest.from(request)
-//                            .headers(headers -> {
-//                                headers.remove("XSRF-TOKEN");
-//                            }).build();
-//                })
-//                .filter(tokenRelay())
-//                .build();
-//    }
 }
