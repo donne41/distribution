@@ -1,0 +1,1 @@
+CREATE DATABASE message_db;
