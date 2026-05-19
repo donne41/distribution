@@ -8,6 +8,7 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.userdetails.User;
@@ -41,6 +42,8 @@ import java.util.UUID;
 public class AutherizitionServerConfig {
 
     Logger log = LoggerFactory.getLogger(AutherizitionServerConfig.class);
+    @Value("${spring.security.oauth2.authorizationserver.issuer}")
+    private String issuerUrl;
 
     //redirect uri must point to bff and be same as the one in bff properties redirect uri
     @Bean
@@ -77,7 +80,7 @@ public class AutherizitionServerConfig {
     @Bean
     public AuthorizationServerSettings authorizationServerSettings(){
         return AuthorizationServerSettings.builder()
-                .issuer("http://127.0.0.1:9000")
+                .issuer(issuerUrl)
                 .build();
     }
 

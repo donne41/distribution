@@ -22,6 +22,11 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      authservice:
+        condition: service_started
+    environment:
+      - DB_HOST=postgres
+      - AUTH_HOST=authservice
 
   messageservice:
     build: ./messageservice
@@ -30,6 +35,36 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      authservice:
+        condition: service_started
+    environment:
+      - DB_HOST=postgres
+      - AUTH_HOST=authservice
+
+  authservice:
+    build: ./authservice
+    ports:
+      - "9000:9000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - AUTH_PUB_HOST=authservice
+    healthcheck:
+      test: ["CMD", "nc", "-z", "authservice", "9000"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  bff:
+    build: ./bff
+    ports:
+      - "8080:8080"
+    depends_on:
+      authservice:
+        condition: service_healthy
+    environment:
+      - AUTH_HOST=authservice
 
 volumes:
   postgres_data:
