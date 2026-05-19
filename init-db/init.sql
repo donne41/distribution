@@ -1,1 +1,2 @@
+CREATE DATABASE user_db;
 CREATE DATABASE message_db;
