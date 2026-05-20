@@ -22,8 +22,5 @@ public class TestController {
         return "Hello " + name + "from service1!";
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
-    }
+
 }

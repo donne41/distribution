@@ -1,4 +1,4 @@
-package example.service1.starter;
+package example.service1.config;
 
 import example.service1.users.UserEntity;
 import example.service1.users.UserRepository;
@@ -8,9 +8,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
+@Order(1)
 @Slf4j
 public class UserInitilizer implements CommandLineRunner {
     private final UserRepository userRepository;

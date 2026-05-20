@@ -66,16 +66,16 @@ public class AutherizitionServerConfig {
         return new InMemoryRegisteredClientRepository(client);
     }
 
-    @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder encoder){
-        UserDetails user = User.builder()
-                .username("demo")
-                .password(encoder.encode("demo"))
-                .roles("USER")
-                .build();
-
-        return new InMemoryUserDetailsManager(user);
-    }
+//    @Bean
+//    public UserDetailsService userDetailsService(PasswordEncoder encoder){
+//        UserDetails user = User.builder()
+//                .username("demo")
+//                .password(encoder.encode("demo"))
+//                .roles("USER")
+//                .build();
+//
+//        return new InMemoryUserDetailsManager(user);
+//    }
 
     @Bean
     public AuthorizationServerSettings authorizationServerSettings(){

@@ -24,14 +24,14 @@ public class UserEntity implements UserDetails{
     @Id
     private Long id;
     private String name;
-    private String username;
+    private String userName;
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
 
 
     public UserEntity(String name, String username, String password, List<String> roles) {
         this.name = name;
-        this.username = username;
+        this.userName = username;
         this.password = password;
         this.authorities = setAuthoritesList(roles);
     }
@@ -40,6 +40,11 @@ public class UserEntity implements UserDetails{
     }
 
     public UserEntity(){
+    }
+
+    @Override
+    public String getUsername() {
+        return "";
     }
 
     @Override
