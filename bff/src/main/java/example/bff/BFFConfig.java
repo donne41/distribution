@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -32,7 +33,8 @@ import static org.springframework.cloud.gateway.server.mvc.handler.GatewayRouter
 public class BFFConfig {
 
     Logger LOG = LoggerFactory.getLogger(BFFConfig.class);
-
+    @Value("${local.userservice}")
+    private String userServiceAdress;
 
     @Bean
     SecurityFilterChain security(HttpSecurity http) {
@@ -81,7 +83,7 @@ public class BFFConfig {
                     LOG.info("URI before: " + request.uri());
                     return request;
                 })
-                .before(uri("http://localhost:8081/"))
+                .before(uri("http://" + userServiceAdress + ":8081/"))
                 // .before(setPath("/api/test")) Behövs inte för att uri är redan korrekt
                 .before(request -> {
                             LOG.info("URI After: " + request.uri());

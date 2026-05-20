@@ -5,12 +5,26 @@ services:
       - 'POSTGRES_USER=myuser'
       - 'POSTGRES_PASSWORD=secret'
     ports:
-      - "5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
       - ./init-db:/docker-entrypoint-initdb.d/
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U myuser"]
+      test: [ "CMD-SHELL", "pg_isready -U myuser" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - "RABBITMQ_DEFAULT_USER=guest"
+      - "RABBITMQ_DEFAULT_PASS=guest"
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "rabbitmq", "5672" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -18,16 +32,18 @@ services:
   userservice:
     build: ./userservice
     ports:
-    - "8081:8081"
+      - "8081:8081"
     depends_on:
       postgres:
         condition: service_healthy
+      rabbitmq:
+        condition: service_started
       authservice:
         condition: service_started
     environment:
       - DB_HOST=postgres
       - AUTH_HOST=authservice
-
+      - SPRING.RABBITMQ.HOST=rabbitmq
   messageservice:
     build: ./messageservice
     ports:
@@ -37,9 +53,12 @@ services:
         condition: service_healthy
       authservice:
         condition: service_started
+      rabbitmq:
+        condition: service_started
     environment:
       - DB_HOST=postgres
       - AUTH_HOST=authservice
+      - SPRING.RABBITMQ.HOST=rabbitmq
 
   authservice:
     build: ./authservice
@@ -51,7 +70,7 @@ services:
     environment:
       - AUTH_PUB_HOST=authservice
     healthcheck:
-      test: ["CMD", "nc", "-z", "authservice", "9000"]
+      test: [ "CMD", "nc", "-z", "authservice", "9000" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -65,6 +84,7 @@ services:
         condition: service_healthy
     environment:
       - AUTH_HOST=authservice
+      - USER_HOST=userservice
 
 volumes:
   postgres_data:
