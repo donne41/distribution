@@ -11,15 +11,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.function.RouterFunction;
+import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerResponse;
 
 import java.io.IOException;
+import java.util.Map;
 
 import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.setPath;
 import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.uri;
@@ -40,10 +44,13 @@ public class BFFConfig {
     SecurityFilterChain security(HttpSecurity http) {
         return http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/chatup/**").permitAll()
+                        .requestMatchers("/chatup/**", "/css/**").permitAll()
+                        .requestMatchers("/").authenticated()
                         .anyRequest().authenticated())
                 // enable oauth2 login
-                .oauth2Login(Customizer.withDefaults())
+                .oauth2Login(oauth -> oauth
+                        .defaultSuccessUrl("/", true))
+
                 //enable tokenRelay Oauth2 client
                 .oauth2Client(Customizer.withDefaults())
                 // save csrf token for post request from diffrent modules
@@ -174,4 +181,21 @@ public class BFFConfig {
                 .filter(tokenRelay())
                 .build();
     }
+
+    @Bean
+    public RouterFunction<ServerResponse> routeToDashBoard() {
+        return RouterFunctions.route()
+                .GET("/", request -> {
+
+                    return ServerResponse.ok()
+                            .render("dashboard");
+                })
+                .build();
+    }
+
+
+
+
+
+
 }
