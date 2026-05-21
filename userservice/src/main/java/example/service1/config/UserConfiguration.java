@@ -20,9 +20,9 @@ public class UserConfiguration {
                 )
                 .authorizeHttpRequests(
                         auth -> auth
-                                .requestMatchers(HttpMethod.GET, "/api/users/**", "/error")
+                                .requestMatchers(HttpMethod.GET, "/api/users/**", "/error", "/api/**")
                                 .permitAll()
-                                .anyRequest().permitAll()
+                                .anyRequest().authenticated()
                 );
         return http.build();
     }

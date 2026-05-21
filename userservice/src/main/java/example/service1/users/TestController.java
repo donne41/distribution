@@ -20,7 +20,8 @@ public class TestController {
 
     @GetMapping("/api/test")
     public String test(@AuthenticationPrincipal UserEntity user) {
-        String name = userService.getNameFromUsername(user.getUsername());
+        //String name = userService.getNameFromUsername(user.getUsername());
+        String name = "Auth princiblae is not included now ";
         return "Hello " + name + "from service1!";
     }
 
