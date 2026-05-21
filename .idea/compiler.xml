@@ -6,11 +6,8 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="bff" />
-        <module name="service3" />
         <module name="authservice" />
-        <module name="userservice" />
-        <module name="messageservice" />
+        <module name="service3" />
       </profile>
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />
@@ -20,11 +17,43 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="authservice (2)" target="1.5" />
+      <module name="authservice (3)" target="25" />
+      <module name="authservice (4)" target="1.5" />
+      <module name="authservice (5)" target="25" />
+      <module name="authservice (6)" target="25" />
+      <module name="bff (2)" target="25" />
       <module name="chatUp" target="21" />
       <module name="chatUp.main" target="21" />
       <module name="chatUp.test" target="21" />
+      <module name="messageservice (1)" target="25" />
       <module name="servicd1" target="25" />
       <module name="service2" target="25" />
+      <module name="userservice (1)" target="25" />
+      <module name="userservice (10)" target="25" />
+      <module name="userservice (11)" target="25" />
+      <module name="userservice (12)" target="25" />
+      <module name="userservice (14)" target="1.8" />
+      <module name="userservice (15)" target="25" />
+      <module name="userservice (16)" target="1.8" />
+      <module name="userservice (17)" target="25" />
+      <module name="userservice (18)" target="25" />
+      <module name="userservice (19)" target="1.8" />
+      <module name="userservice (2)" target="25" />
+      <module name="userservice (20)" target="25" />
+      <module name="userservice (21)" target="25" />
+      <module name="userservice (22)" target="25" />
+      <module name="userservice (23)" target="1.8" />
+      <module name="userservice (24)" target="25" />
+      <module name="userservice (25)" target="25" />
+      <module name="userservice (26)" target="1.8" />
+      <module name="userservice (3)" target="1.8" />
+      <module name="userservice (4)" target="1.8" />
+      <module name="userservice (5)" target="1.8" />
+      <module name="userservice (6)" target="25" />
+      <module name="userservice (7)" target="25" />
+      <module name="userservice (8)" target="25" />
+      <module name="userservice (9)" target="25" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">

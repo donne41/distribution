@@ -44,13 +44,11 @@ public class BFFConfig {
     SecurityFilterChain security(HttpSecurity http) {
         return http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/chatup/**", "/css/**").permitAll()
+                        .requestMatchers("/chatup/**", "/css/**", "/login/**").permitAll()
                         .requestMatchers("/").authenticated()
                         .anyRequest().authenticated())
                 // enable oauth2 login
-                .oauth2Login(oauth -> oauth
-                        .defaultSuccessUrl("/", true))
-
+                .oauth2Login(Customizer.withDefaults())
                 //enable tokenRelay Oauth2 client
                 .oauth2Client(Customizer.withDefaults())
                 // save csrf token for post request from diffrent modules
