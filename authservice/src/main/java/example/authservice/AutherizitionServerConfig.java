@@ -1,19 +1,21 @@
 package example.authservice;
 
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
+import ch.qos.logback.classic.spi.ConfiguratorRank;
 import com.nimbusds.jose.jwk.*;
-import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.logging.LoggingInitializationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.MediaType;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -22,11 +24,14 @@ import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -65,6 +70,42 @@ public class AutherizitionServerConfig {
                 .build();
         return new InMemoryRegisteredClientRepository(client);
     }
+//
+//        @Bean
+//    @Order(1)
+//    public SecurityFilterChain authServerSecurityFilterChain(HttpSecurity http) throws Exception {
+//        log.info("-- Filterchain Login entry custom entry point set -- ");
+//        OAuth2AuthorizationServerConfigurer authServerConfigurer =
+//                new OAuth2AuthorizationServerConfigurer();
+//
+//        http
+//                .securityMatcher(authServerConfigurer.getEndpointsMatcher())
+//                .with(authServerConfigurer, (authorizationServer) -> authorizationServer
+//                        .oidc(Customizer.withDefaults())
+//                )
+//                .authorizeHttpRequests((authorize) -> authorize
+//                        .anyRequest().authenticated());
+//
+//        http.exceptionHandling(exceptions ->
+//            exceptions.defaultAuthenticationEntryPointFor(
+//                    new LoginUrlAuthenticationEntryPoint("/login"),
+//                    new MediaTypeRequestMatcher(MediaType.TEXT_HTML))
+//        );
+//        return http.build();
+//    }
+//
+//
+//    @Bean
+//    @Order(2)
+//    public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
+//        log.info("-- Running custom authWithDefaults -- ");
+//        http
+//                .authorizeHttpRequests(auth -> auth
+//                        .anyRequest().authenticated())
+//                .formLogin(Customizer.withDefaults());
+//        return http.build();
+//    }
+
 
 //    @Bean
 //    public UserDetailsService userDetailsService(PasswordEncoder encoder){
@@ -78,7 +119,7 @@ public class AutherizitionServerConfig {
 //    }
 
     @Bean
-    public AuthorizationServerSettings authorizationServerSettings(){
+    public AuthorizationServerSettings authorizationServerSettings() {
         return AuthorizationServerSettings.builder()
                 .issuer(issuerUrl)
                 .build();
@@ -86,7 +127,7 @@ public class AutherizitionServerConfig {
 
 
     @Bean
-    PasswordEncoder passwordEncoder(){
+    PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 

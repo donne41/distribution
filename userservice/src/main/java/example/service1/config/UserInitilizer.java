@@ -8,6 +8,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @Order(1)
 @Slf4j
@@ -24,8 +26,12 @@ public class UserInitilizer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         if (userRepository.count() == 0) {
             log.info(" -- RUNNING DATA FILL --");
-            userRepository.save(new UserEntity("demo", passwordEncoder.encode("demo")));
+            userRepository.save(new UserEntity("Clippy" ,
+                    "demo",
+                    passwordEncoder.encode("demo"),
+                    List.of("user")));
+        }else {
+            log.info(" -- NO DATA FILL WAS NECESSARY -- ");
         }
     }
 }
-

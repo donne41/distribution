@@ -44,12 +44,22 @@ public class UserEntity implements UserDetails{
 
     @Override
     public String getUsername() {
-        return "";
+        return userName;
+    }
+    @Override
+    public String getPassword(){
+        return password;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return authorities;
+    }
+
+    public List<String> getAuthAsList(){
+        return authorities.stream().map(
+                role -> role.toString().substring(5))
+                .toList();
     }
 
     public void setAuthorities(List<String> roles) {
