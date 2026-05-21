@@ -1,0 +1,114 @@
+:root {
+    --color-bg:                #000;
+    --color-surface:           #111;
+    --color-input-bg:          #181818;
+    --color-border:            #222;
+    --color-border-focus:      #666;
+    --color-text-primary:      #fff;
+    --color-text-secondary:    #ccc;
+    --color-text-muted:        #888;
+    --color-text-dim:          #666;
+    --color-accent:            #fff;
+    --color-accent-hover:      #ccc;
+    --color-accent-on:         #000;
+    --color-alert-error-bg:    rgba(217, 48, 37, 0.15);
+    --color-alert-error-border:rgba(217, 48, 37, 0.3);
+    --color-alert-error-fg:    #f28b82;
+    --color-alert-success-bg:  rgba(30, 126, 52, 0.15);
+    --color-alert-success-border:rgba(30, 126, 52, 0.3);
+    --color-alert-success-fg:  #81c995;
+    --font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --radius-sm:   6px;
+    --radius-md:   8px;
+    --shadow-card: 0 8px 16px -2px rgba(0, 0, 0, 0.6);
+}
+
+/* 2. Layout & Komponenter */
+body.auth-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+    font-family: var(--font-system);
+    margin: 0;
+}
+
+.container {
+    background-color: var(--color-surface);
+    padding: 32px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-card);
+    width: 100%;
+    max-width: 420px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+header p { color: var(--color-text-dim); font-size: 14px; margin-top: 5px; }
+
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 8px; font-size: 14px; color: var(--color-text-secondary); }
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-input-bg);
+    color: var(--color-text-primary);
+    box-sizing: border-box;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--color-accent);
+    color: var(--color-accent-on);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.oauth2-btn {
+    background: var(--color-accent);
+    color: var(--color-accent-on);
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    border: none;
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    width: 100%;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.alert-error {
+    background: var(--color-alert-error-bg);
+    border: 1px solid var(--color-alert-error-border);
+    color: var(--color-alert-error-fg);
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 20px;
+}
+
+.alert-success {
+    background: var(--color-alert-success-bg);
+    border: 1px solid var(--color-alert-success-border);
+    color: var(--color-alert-success-fg);
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 20px;
+}
+
+.divider { text-align: center; margin-top: 20px; color: var(--color-text-muted); font-size: 14px; }
+.signup-link { text-align: center; font-size: 14px; margin-top: 20px; color: var(--color-text-muted); }
+.signup-link a { color: var(--color-text-primary); text-decoration: underline; }

@@ -11,9 +11,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
@@ -23,7 +24,6 @@ import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerResponse;
 
 import java.io.IOException;
-import java.util.Map;
 
 import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.setPath;
 import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.uri;
@@ -41,7 +41,7 @@ public class BFFConfig {
     private String userServiceAdress;
 
     @Bean
-    SecurityFilterChain security(HttpSecurity http) {
+    SecurityFilterChain security(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) {
         return http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/chatup/**", "/css/**", "/login/**").permitAll()
@@ -51,6 +51,10 @@ public class BFFConfig {
                 .oauth2Login(Customizer.withDefaults())
                 //enable tokenRelay Oauth2 client
                 .oauth2Client(Customizer.withDefaults())
+
+                .logout(logout -> logout
+                        .logoutSuccessHandler(oidcLogoutSuccessHandler(clientRegistrationRepository))
+                )
                 // save csrf token for post request from diffrent modules
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
@@ -58,6 +62,7 @@ public class BFFConfig {
                 )
                 .build();
     }
+
 
     //csrf token redering before proxy to service
     @Bean
@@ -189,6 +194,14 @@ public class BFFConfig {
                             .render("dashboard");
                 })
                 .build();
+    }
+
+    private LogoutSuccessHandler oidcLogoutSuccessHandler(ClientRegistrationRepository clientRegistrationRepository) {
+        OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler =
+                new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository);
+        oidcLogoutSuccessHandler.setPostLogoutRedirectUri("{baseUrl}/");
+        return oidcLogoutSuccessHandler;
+
     }
 
 

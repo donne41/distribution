@@ -54,6 +54,7 @@ public class AutherizitionServerConfig {
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .redirectUri("http://localhost:8080/login/oauth2/code/authservice") //ändra till gateway
+                .postLogoutRedirectUri("http://localhost:8080/")
                 .scopes(scopes -> scopes.addAll(
                         Set.of("user.read", "user.write",
                                 OidcScopes.OPENID,
@@ -66,7 +67,7 @@ public class AutherizitionServerConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
                 new OAuth2AuthorizationServerConfigurer();
 
