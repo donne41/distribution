@@ -27,14 +27,6 @@ public class UserService {
         return nameEntity.getName();
     }
 
-//    @Override
-//    public UserEntity loadUserByUsername(String username) throws UsernameNotFoundException {
-//        UserEntity foundUser = repository.findByUserName(username);
-//        if(foundUser == null)
-//            throw new UsernameNotFoundException("No user found!");
-//        return foundUser;
-//    }
-
     public UserEntity findUser(String username) {
         return repository.findByUserName(username);
     }
