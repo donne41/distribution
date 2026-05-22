@@ -70,53 +70,6 @@ public class AutherizitionServerConfig {
                 .build();
         return new InMemoryRegisteredClientRepository(client);
     }
-//
-//        @Bean
-//    @Order(1)
-//    public SecurityFilterChain authServerSecurityFilterChain(HttpSecurity http) throws Exception {
-//        log.info("-- Filterchain Login entry custom entry point set -- ");
-//        OAuth2AuthorizationServerConfigurer authServerConfigurer =
-//                new OAuth2AuthorizationServerConfigurer();
-//
-//        http
-//                .securityMatcher(authServerConfigurer.getEndpointsMatcher())
-//                .with(authServerConfigurer, (authorizationServer) -> authorizationServer
-//                        .oidc(Customizer.withDefaults())
-//                )
-//                .authorizeHttpRequests((authorize) -> authorize
-//                        .anyRequest().authenticated());
-//
-//        http.exceptionHandling(exceptions ->
-//            exceptions.defaultAuthenticationEntryPointFor(
-//                    new LoginUrlAuthenticationEntryPoint("/login"),
-//                    new MediaTypeRequestMatcher(MediaType.TEXT_HTML))
-//        );
-//        return http.build();
-//    }
-//
-//
-//    @Bean
-//    @Order(2)
-//    public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
-//        log.info("-- Running custom authWithDefaults -- ");
-//        http
-//                .authorizeHttpRequests(auth -> auth
-//                        .anyRequest().authenticated())
-//                .formLogin(Customizer.withDefaults());
-//        return http.build();
-//    }
-
-
-//    @Bean
-//    public UserDetailsService userDetailsService(PasswordEncoder encoder){
-//        UserDetails user = User.builder()
-//                .username("demo")
-//                .password(encoder.encode("demo"))
-//                .roles("USER")
-//                .build();
-//
-//        return new InMemoryUserDetailsManager(user);
-//    }
 
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
@@ -131,34 +84,6 @@ public class AutherizitionServerConfig {
         return new BCryptPasswordEncoder();
     }
 
-
-//    Problem att det inte kan välja ec kurvan, kan vara nått med att man testar på osäker sätt.
-//    @Bean
-//    public JWKSource<SecurityContext> jwkSource() throws JOSEException {
-//        ECKey ecJwk = generateEc();
-//
-//        JWKSet jwkSet = new JWKSet(ecJwk);
-//        return (selector, context) -> selector.select(jwkSet);
-//    }
-//
-//    public static ECKey generateEc() {
-//        try {
-//            KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
-//            kpg.initialize(new ECGenParameterSpec("secp256r1"));
-//            KeyPair keyPair = kpg.generateKeyPair();
-//
-//            ECPublicKey publicKey = (ECPublicKey) keyPair.getPublic();
-//            ECPrivateKey privateKey = (ECPrivateKey) keyPair.getPrivate();
-//
-//            return new ECKey.Builder(Curve.P_256, publicKey)
-//                    .privateKey(privateKey)
-//                    .keyID(UUID.randomUUID().toString())
-//                    .algorithm(JWSAlgorithm.ES256) // viktigt ES256
-//                    .build();
-//        } catch (Exception e) {
-//            throw new IllegalStateException(e);
-//        }
-//    }
 
     @Bean
     JwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource) {

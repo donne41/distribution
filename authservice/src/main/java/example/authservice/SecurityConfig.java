@@ -55,9 +55,4 @@ public class SecurityConfig {
             }
         };
     }
-//
-//    @Bean
-//    public UserService userDetailsService(UserRepository repository){
-//        return new UserService(repository);
-//    }
 }

@@ -20,7 +20,7 @@ public class UserConfiguration {
                 )
                 .authorizeHttpRequests(
                         auth -> auth
-                                .requestMatchers(HttpMethod.GET, "/api/users/**", "/error", "/api/**")
+                                .requestMatchers(HttpMethod.GET, "/api/users/**", "/error", "/api/test")
                                 .permitAll()
                                 .anyRequest().authenticated()
                 );
