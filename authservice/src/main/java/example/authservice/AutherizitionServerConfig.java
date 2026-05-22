@@ -71,12 +71,10 @@ public class AutherizitionServerConfig {
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
                 new OAuth2AuthorizationServerConfigurer();
 
-        http
-                .apply(authorizationServerConfigurer)
+        http.apply(authorizationServerConfigurer)
                 .oidc(Customizer.withDefaults());
 
-        http
-                .exceptionHandling(e -> e
+        http.exceptionHandling(e -> e
                         .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
                 )
                 .authorizeHttpRequests(auth -> auth

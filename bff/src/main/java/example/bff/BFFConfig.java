@@ -45,7 +45,7 @@ public class BFFConfig {
         return http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/chatup/**", "/css/**", "/login/**").permitAll()
-                        .requestMatchers("/").authenticated()
+                        .requestMatchers("/", "/api/test2").authenticated()
                         .anyRequest().authenticated())
                 // enable oauth2 login
                 .oauth2Login(Customizer.withDefaults())
