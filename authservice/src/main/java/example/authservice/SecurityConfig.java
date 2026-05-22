@@ -5,11 +5,14 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 
 import java.util.List;
 
@@ -20,16 +23,21 @@ public class SecurityConfig {
     private String userServiceAdress;
     private Logger log = LoggerFactory.getLogger(SecurityConfig.class);
 
+    private ClientHttpRequestFactory getClientHttpRequestFactory(){
+        HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory();
+        clientHttpRequestFactory.setConnectionRequestTimeout(5);
+        return clientHttpRequestFactory;
+    }
+
     @Bean
     public UserDetailsService userDetailsService() {
+
         RestClient client = RestClient.builder()
                 .baseUrl(userServiceAdress)
+                .requestFactory(getClientHttpRequestFactory())
                 .build();
-        log.info("-- Rest client made: {} --", client.hashCode());
 
         return username -> {
-            log.info(" -- UserDetails Request for {}", username);
-            log.info("-- service adress: {}");
             try {
                 System.out.println("-- Trying RestClient -- ");
                 UserDto userDto = client
@@ -38,8 +46,7 @@ public class SecurityConfig {
                         .retrieve()
                         .body(UserDto.class);
                 if (userDto == null) {
-                    log.info("-- User returns null -- ");
-                    System.out.println("Throwing exception");
+                    log.error("-- User returns null -- ");
                     throw new UsernameNotFoundException("Account did not exist");
                 }
                 log.info("-- Rest client has run, returning as userDetail -- ");
@@ -49,9 +56,12 @@ public class SecurityConfig {
                         .password(userDto.password())
                         .roles(userDto.roles().toArray((new String[0])))
                         .build();
-            } catch (Exception e) {
-                System.out.println("Client Result: " + e);
-                throw new UsernameNotFoundException("Kunde inte hitta användaren från UserService");
+            } catch (RestClientException e){
+                log.error("Failed to fetch user details");
+                throw new RuntimeException("Error fetching user details"+ e);
+            }catch (Exception e) {
+                log.error("General expetion in userDetails service.");
+                throw new UsernameNotFoundException("Could not find account " + e);
             }
         };
     }
