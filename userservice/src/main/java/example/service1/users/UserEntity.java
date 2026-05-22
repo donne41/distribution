@@ -58,7 +58,8 @@ public class UserEntity implements UserDetails{
 
     public List<String> getAuthAsList(){
         return authorities.stream().map(
-                role -> role.toString().substring(5))
+                role -> role.toString())
+                .map(role -> role.startsWith("ROLE_") ? role.substring(5) : role)
                 .toList();
     }
 

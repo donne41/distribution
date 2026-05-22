@@ -27,7 +27,6 @@ public class TestController {
 
     @GetMapping("/api/users/{username}")
     public UserDto getUser(@PathVariable String username){
-        System.out.println("REQUEST FOR USERS, USERNAME: " + username);
         UserEntity user = userService.findUser(username);
         if(user == null) throw new UsernameNotFoundException("No user found");
         return new UserDto(

@@ -10,18 +10,21 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserService{
+public class UserService {
 
     private UserRepository repository;
     private PasswordEncoder encoder;
 
-    public UserService(UserRepository repository, PasswordEncoder encoder){
+    public UserService(UserRepository repository, PasswordEncoder encoder) {
         this.repository = repository;
         this.encoder = encoder;
     }
 
-    public String getNameFromUsername(String username){
-        return repository.findByUserName(username).getName();
+    public String getNameFromUsername(String username) {
+        UserEntity nameEntity = repository.findByUserName(username);
+        if (nameEntity == null)
+            throw new RuntimeException("No user found");
+        return nameEntity.getName();
     }
 
 //    @Override
@@ -32,7 +35,7 @@ public class UserService{
 //        return foundUser;
 //    }
 
-    public UserEntity findUser(String username){
+    public UserEntity findUser(String username) {
         return repository.findByUserName(username);
     }
 }
