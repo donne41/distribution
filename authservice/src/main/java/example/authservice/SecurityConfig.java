@@ -20,18 +20,12 @@ public class SecurityConfig {
     private String userServiceAdress;
     private Logger log = LoggerFactory.getLogger(SecurityConfig.class);
 
-    private ClientHttpRequestFactory getClientHttpRequestFactory(){
-        HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory();
-        clientHttpRequestFactory.setConnectionRequestTimeout(5);
-        return clientHttpRequestFactory;
-    }
 
     @Bean
     public UserDetailsService userDetailsService() {
 
         RestClient client = RestClient.builder()
                 .baseUrl(userServiceAdress)
-                .requestFactory(getClientHttpRequestFactory())
                 .build();
 
         return username -> {

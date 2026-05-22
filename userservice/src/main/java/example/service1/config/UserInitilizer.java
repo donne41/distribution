@@ -3,6 +3,8 @@ package example.service1.config;
 import example.service1.users.UserEntity;
 import example.service1.users.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,10 +14,10 @@ import java.util.List;
 
 @Component
 @Order(1)
-@Slf4j
 public class UserInitilizer implements CommandLineRunner {
     private final UserRepository userRepository;
     private PasswordEncoder passwordEncoder;
+    Logger log = LoggerFactory.getLogger(UserInitilizer.class);
 
     public UserInitilizer(UserRepository repo, PasswordEncoder encoder) {
         userRepository = repo;

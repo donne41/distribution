@@ -50,6 +50,7 @@ public class UserEntity implements UserDetails{
     public String getPassword(){
         return password;
     }
+    public String getName(){ return name;}
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
