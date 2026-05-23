@@ -1,9 +1,6 @@
 package example.authservice;
 
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.*;
-import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.slf4j.Logger;
@@ -11,8 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,15 +24,13 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.security.spec.ECGenParameterSpec;
 import java.util.Set;
 import java.util.UUID;
 
@@ -42,6 +38,16 @@ import java.util.UUID;
 public class AutherizitionServerConfig {
 
     Logger log = LoggerFactory.getLogger(AutherizitionServerConfig.class);
+
+    @Value("${spring.security.oauth2.client.gateway.secret}")
+    private String gatewayClientSecret;
+
+    @Value("${spring.security.oauth2.client.gateway.redirect-uri}")
+    private String gatewayRedirectUri;
+
+    @Value("${spring.security.oauth2.client.gateway.post-logout-redirect-uri}")
+    private String gatewayPostLogoutRedirectUri;
+
     @Value("${spring.security.oauth2.authorizationserver.issuer}")
     private String issuerUrl;
 
@@ -50,11 +56,12 @@ public class AutherizitionServerConfig {
     public RegisteredClientRepository registeredClientRepository() {
         RegisteredClient client = RegisteredClient.withId(UUID.randomUUID().toString())
                 .clientId("gateway-client")
-                .clientSecret(passwordEncoder().encode("secret"))
+                .clientSecret(passwordEncoder().encode(gatewayClientSecret))
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .redirectUri("http://localhost:8080/login/oauth2/code/authservice") //ändra till gateway
+                .redirectUri(gatewayRedirectUri) //ändra till gateway
+                .postLogoutRedirectUri(gatewayPostLogoutRedirectUri)
                 .scopes(scopes -> scopes.addAll(
                         Set.of("user.read", "user.write",
                                 OidcScopes.OPENID,
@@ -67,18 +74,28 @@ public class AutherizitionServerConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder encoder){
-        UserDetails user = User.builder()
-                .username("demo")
-                .password(encoder.encode("demo"))
-                .roles("USER")
-                .build();
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
+        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
+                new OAuth2AuthorizationServerConfigurer();
 
-        return new InMemoryUserDetailsManager(user);
+        http.apply(authorizationServerConfigurer)
+                .oidc(Customizer.withDefaults());
+
+        http.exceptionHandling(e -> e
+                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
+                )
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/login", "/css/**").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form.loginPage("/login"));
+
+        return http.build();
     }
 
+
     @Bean
-    public AuthorizationServerSettings authorizationServerSettings(){
+    public AuthorizationServerSettings authorizationServerSettings() {
         return AuthorizationServerSettings.builder()
                 .issuer(issuerUrl)
                 .build();
@@ -86,38 +103,11 @@ public class AutherizitionServerConfig {
 
 
     @Bean
-    PasswordEncoder passwordEncoder(){
+    PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
 
-//    Problem att det inte kan välja ec kurvan, kan vara nått med att man testar på osäker sätt.
-//    @Bean
-//    public JWKSource<SecurityContext> jwkSource() throws JOSEException {
-//        ECKey ecJwk = generateEc();
-//
-//        JWKSet jwkSet = new JWKSet(ecJwk);
-//        return (selector, context) -> selector.select(jwkSet);
-//    }
-//
-//    public static ECKey generateEc() {
-//        try {
-//            KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
-//            kpg.initialize(new ECGenParameterSpec("secp256r1"));
-//            KeyPair keyPair = kpg.generateKeyPair();
-//
-//            ECPublicKey publicKey = (ECPublicKey) keyPair.getPublic();
-//            ECPrivateKey privateKey = (ECPrivateKey) keyPair.getPrivate();
-//
-//            return new ECKey.Builder(Curve.P_256, publicKey)
-//                    .privateKey(privateKey)
-//                    .keyID(UUID.randomUUID().toString())
-//                    .algorithm(JWSAlgorithm.ES256) // viktigt ES256
-//                    .build();
-//        } catch (Exception e) {
-//            throw new IllegalStateException(e);
-//        }
-//    }
 
     @Bean
     JwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource) {
