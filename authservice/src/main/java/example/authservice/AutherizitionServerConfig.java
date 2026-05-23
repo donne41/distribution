@@ -1,21 +1,17 @@
 package example.authservice;
 
-import ch.qos.logback.classic.spi.ConfiguratorRank;
 import com.nimbusds.jose.jwk.*;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.logging.LoggingInitializationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
-import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -24,22 +20,17 @@ import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.security.spec.ECGenParameterSpec;
 import java.util.Set;
 import java.util.UUID;
 
@@ -47,6 +38,16 @@ import java.util.UUID;
 public class AutherizitionServerConfig {
 
     Logger log = LoggerFactory.getLogger(AutherizitionServerConfig.class);
+
+    @Value("${spring.security.oauth2.client.gateway.secret}")
+    private String gatewayClientSecret;
+
+    @Value("${spring.security.oauth2.client.gateway.redirect-uri}")
+    private String gatewayRedirectUri;
+
+    @Value("${spring.security.oauth2.client.gateway.post-logout-redirect-uri}")
+    private String gatewayPostLogoutRedirectUri;
+
     @Value("${spring.security.oauth2.authorizationserver.issuer}")
     private String issuerUrl;
 
@@ -55,11 +56,12 @@ public class AutherizitionServerConfig {
     public RegisteredClientRepository registeredClientRepository() {
         RegisteredClient client = RegisteredClient.withId(UUID.randomUUID().toString())
                 .clientId("gateway-client")
-                .clientSecret(passwordEncoder().encode("secret"))
+                .clientSecret(passwordEncoder().encode(gatewayClientSecret))
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .redirectUri("http://localhost:8080/login/oauth2/code/authservice") //ändra till gateway
+                .redirectUri(gatewayRedirectUri) //ändra till gateway
+                .postLogoutRedirectUri(gatewayPostLogoutRedirectUri)
                 .scopes(scopes -> scopes.addAll(
                         Set.of("user.read", "user.write",
                                 OidcScopes.OPENID,
@@ -70,6 +72,27 @@ public class AutherizitionServerConfig {
                 .build();
         return new InMemoryRegisteredClientRepository(client);
     }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
+        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
+                new OAuth2AuthorizationServerConfigurer();
+
+        http.apply(authorizationServerConfigurer)
+                .oidc(Customizer.withDefaults());
+
+        http.exceptionHandling(e -> e
+                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
+                )
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/login", "/css/**").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form.loginPage("/login"));
+
+        return http.build();
+    }
+
 
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
@@ -83,6 +106,7 @@ public class AutherizitionServerConfig {
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
 
 
     @Bean
