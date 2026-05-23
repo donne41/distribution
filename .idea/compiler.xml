@@ -11,6 +11,7 @@
         <module name="bff" />
         <module name="authservice" />
         <module name="userservice" />
+        <module name="messageservice" />
       </profile>
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />

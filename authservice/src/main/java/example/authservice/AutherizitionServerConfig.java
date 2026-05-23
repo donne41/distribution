@@ -11,8 +11,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,7 +24,6 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
@@ -41,6 +38,16 @@ import java.util.UUID;
 public class AutherizitionServerConfig {
 
     Logger log = LoggerFactory.getLogger(AutherizitionServerConfig.class);
+
+    @Value("${spring.security.oauth2.client.gateway.secret}")
+    private String gatewayClientSecret;
+
+    @Value("${spring.security.oauth2.client.gateway.redirect-uri}")
+    private String gatewayRedirectUri;
+
+    @Value("${spring.security.oauth2.client.gateway.post-logout-redirect-uri}")
+    private String gatewayPostLogoutRedirectUri;
+
     @Value("${spring.security.oauth2.authorizationserver.issuer}")
     private String issuerUrl;
 
@@ -49,12 +56,12 @@ public class AutherizitionServerConfig {
     public RegisteredClientRepository registeredClientRepository() {
         RegisteredClient client = RegisteredClient.withId(UUID.randomUUID().toString())
                 .clientId("gateway-client")
-                .clientSecret(passwordEncoder().encode("secret"))
+                .clientSecret(passwordEncoder().encode(gatewayClientSecret))
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .redirectUri("http://localhost:8080/login/oauth2/code/authservice") //ändra till gateway
-                .postLogoutRedirectUri("http://localhost:8080/")
+                .redirectUri(gatewayRedirectUri) //ändra till gateway
+                .postLogoutRedirectUri(gatewayPostLogoutRedirectUri)
                 .scopes(scopes -> scopes.addAll(
                         Set.of("user.read", "user.write",
                                 OidcScopes.OPENID,
@@ -86,17 +93,6 @@ public class AutherizitionServerConfig {
         return http.build();
     }
 
-    // For development only
-    @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder encoder){
-        UserDetails user = User.builder()
-                .username("demo")
-                .password(encoder.encode("demo"))
-                .roles("USER")
-                .build();
-
-        return new InMemoryUserDetailsManager(user);
-    }
 
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
