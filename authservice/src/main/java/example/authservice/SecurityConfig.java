@@ -9,6 +9,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 

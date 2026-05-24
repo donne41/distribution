@@ -24,9 +24,9 @@ import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerResponse;
 
 import java.io.IOException;
+import java.security.Provider;
 
-import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.setPath;
-import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.uri;
+import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.*;
 import static org.springframework.cloud.gateway.server.mvc.filter.FilterFunctions.stripPrefix;
 import static org.springframework.cloud.gateway.server.mvc.filter.TokenRelayFilterFunctions.tokenRelay;
 import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions.http;
@@ -203,6 +203,15 @@ public class BFFConfig {
         oidcLogoutSuccessHandler.setPostLogoutRedirectUri("{baseUrl}/");
         return oidcLogoutSuccessHandler;
 
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> routeForAccountname(){
+        return route()
+                .GET("/api/client", http())
+                .before(uri("http://localhost:8081"))
+                .filter(tokenRelay())
+                .build();
     }
 
 
