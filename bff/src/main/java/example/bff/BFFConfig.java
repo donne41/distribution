@@ -59,6 +59,8 @@ public class BFFConfig {
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+
+                        .ignoringRequestMatchers("/api/**") // Tillåt tillfälligt PUT/POST-anrop till API-endpoints utan X-XSRF-TOKEN header
                 )
                 .build();
     }
@@ -122,6 +124,24 @@ public class BFFConfig {
                             return request;
                         }
                 )
+                .filter(tokenRelay())
+                .build();
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> routeGetMessages() {
+        return route()
+                .GET("/api/messages", http())
+                .before(uri("http://localhost:8082"))
+                .filter(tokenRelay())
+                .build();
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> routePostMessage() {
+        return route()
+                .POST("/api/messages", http())
+                .before(uri("http://localhost:8082"))
                 .filter(tokenRelay())
                 .build();
     }
@@ -196,7 +216,6 @@ public class BFFConfig {
                 .build();
     }
 
-    // Flytta till Authservice
     private LogoutSuccessHandler oidcLogoutSuccessHandler(ClientRegistrationRepository clientRegistrationRepository) {
         OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler =
                 new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository);
@@ -204,10 +223,4 @@ public class BFFConfig {
         return oidcLogoutSuccessHandler;
 
     }
-
-
-
-
-
-
 }
