@@ -12,6 +12,21 @@
 
     <button type="submit">Sign Out</button>
 </form>
+<div>
+    <form th:action="@{/get/users}" method="post" th:object="${userDto}">
+        <label for="nameInput">Name:</label>
+        <input id="nameInput" th:name="name" th:text="${userDto.name}">
+        <label for="userName">Username:</label>
+        <input id="userName" th:name="username" th:text="${userDto.username}">
+        <label for="newPassword">Password:</label>
+        <input id="newPassword" th:name="password" th:password="${userDto.password}">
+
+        <label for="roles">Role:</label>
+        <input id="roles" th:name="roles" th:text="${userDto.roles}">
+        <button type="submit">save user</button>
+    </form>
+</div>
+
 
 </body>
 </html>

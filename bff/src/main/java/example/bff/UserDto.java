@@ -1,15 +1,12 @@
-package example.service1.users;
+package example.bff;
 
 import jakarta.validation.constraints.NotBlank;
 
 import java.util.List;
 
 public record UserDto(
-        @NotBlank
         String username,
-        @NotBlank
         String password,
         List<String> roles,
-        @NotBlank
         String name) {
 }

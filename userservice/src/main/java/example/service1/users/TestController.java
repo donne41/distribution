@@ -1,15 +1,18 @@
 package example.service1.users;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
+import java.util.List;
 
 @RestController
 public class TestController {
@@ -34,13 +37,32 @@ public class TestController {
         return new UserDto(
                 user.getUsername(),
                 user.getPassword(),
-                user.getAuthAsList());
+                user.getAuthAsList(),
+                user.getName());
     }
 
-    @GetMapping("/api/client")
+    @GetMapping("/get/token")
     public String getClientName(@AuthenticationPrincipal Jwt jwt){
         String token = jwt.getTokenValue().toLowerCase();
         return "HELLO FROM USER, here is token: "+ token;
+    }
+
+    @GetMapping("/get/users")
+    public List<UserDto> getAllUsers(){
+        return userService.getAllUsers();
+    }
+
+    @PostMapping("/get/users")
+    public ResponseEntity<Void> saveUser(
+            @RequestParam("name") String name,
+            @RequestParam("username") String username,
+            @RequestParam("password") String password,
+            @RequestParam("roles") String roles
+    ){
+        userService.saveUser(new UserDto(username, password, List.of(roles), name));
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create("/"))
+                .build();
     }
 
 

@@ -25,6 +25,10 @@ import org.springframework.web.servlet.function.ServerResponse;
 
 import java.io.IOException;
 import java.security.Provider;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.*;
 import static org.springframework.cloud.gateway.server.mvc.filter.FilterFunctions.stripPrefix;
@@ -190,8 +194,14 @@ public class BFFConfig {
         return RouterFunctions.route()
                 .GET("/", request -> {
 
+                    UserDto newUser = new UserDto("","", List.of(), "");
+                    // Add stuffs to model just like in the controller addAttribute
+                    Map<String, Object> model = Stream.of(
+                            Map.entry("userDto", newUser))
+                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
                     return ServerResponse.ok()
-                            .render("dashboard");
+                            .render("dashboard", model);
                 })
                 .build();
     }
@@ -206,10 +216,27 @@ public class BFFConfig {
     }
 
     @Bean
-    public RouterFunction<ServerResponse> routeForAccountname(){
+    public RouterFunction<ServerResponse> routeForGettingToken(){
         return route()
-                .GET("/api/client", http())
-                .before(uri("http://localhost:8081"))
+                .GET("/get/token", http())
+                .before(uri(userServiceAdress))
+                .filter(tokenRelay())
+                .build();
+    }
+    @Bean
+    public RouterFunction<ServerResponse> routeGetAllUsers(){
+        return route()
+                .GET("/get/users", http())
+                .before(uri(userServiceAdress))
+                .filter(tokenRelay())
+                .build();
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> routePostNewuser(){
+        return route()
+                .POST("/get/users", http())
+                .before(uri(userServiceAdress))
                 .filter(tokenRelay())
                 .build();
     }

@@ -21,8 +21,9 @@ public class UserConfiguration {
                 )
                 .authorizeHttpRequests(
                         auth -> auth
-                                .requestMatchers(HttpMethod.GET, "/api/users/**", "/error")
+                                .requestMatchers(HttpMethod.GET, "/api/users/**", "/error", "/get/**")
                                 .permitAll()
+                                .requestMatchers(HttpMethod.POST, "/get/users").permitAll()
                                 .anyRequest().authenticated()
                 )
                 // read token relay
