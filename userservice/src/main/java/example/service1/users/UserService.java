@@ -30,12 +30,13 @@ public class UserService {
         return nameEntity.getName();
     }
 
-    private UserDto userEntityToDto(UserEntity user){
+    private UserDto userEntityToDto(UserEntity user) {
         return new UserDto(user.getUsername(),
                 "", user.getAuthAsList(),
                 user.getName());
     }
-    private UserEntity userDtoToEntity(UserDto user){
+
+    private UserEntity userDtoToEntity(UserDto user) {
         return new UserEntity(user.name(),
                 user.username(),
                 encoder.encode(user.password()),
@@ -51,15 +52,16 @@ public class UserService {
                 this::userEntityToDto).toList();
     }
 
-    public void saveUser(UserDto newUser){
+    public void saveUser(UserDto newUser) {
         repository.save(userDtoToEntity(newUser));
     }
 
-    public void deleteUser(Long userId){
+    public void deleteUser(Long userId) {
         repository.deleteById(userId);
     }
-    public void deleteUserByUserName(String userName){
-        if(repository.existsByUserName(userName)){
+
+    public void deleteUserByUserName(String userName) {
+        if (repository.existsByUserName(userName)) {
             long Id = repository.findByUserName(userName).getId();
             deleteUser(Id);
         }
