@@ -1,5 +1,8 @@
-package com.chatting.service2.messages;
+package com.chatting.service2.messages.service;
 
+import com.chatting.service2.messages.Message;
+import com.chatting.service2.messages.MessageMapper;
+import com.chatting.service2.messages.MessageRepository;
 import com.chatting.service2.messages.dto.CreateMessageDTO;
 import com.chatting.service2.messages.dto.ReceiveMessageDTO;
 import io.grpc.CallCredentials;
@@ -74,6 +77,14 @@ public class MessageService {
         }
 
         Message message = messageMapper.toEntity(messageRequest);
+
+        // Get more detailed info from fields in UserService proto-file
+        long userId = grpcResponse.getId();
+        String name = grpcResponse.getName();
+
+        message.setUserId(userId);
+        message.setName(name);
+
         message = messageRepository.save(message);
 
         // Todo: Add logic to publish event to Message Queue

@@ -18,5 +18,8 @@ message UserRequest {
 // Answer received
 message UserResponse{
   bool exists = 1;
+  int64 id = 2;
+  string name = 3;
+  string username = 4;
 
 }

@@ -26,12 +26,22 @@ public class GrpcServerService extends UserServiceGrpc.UserServiceImplBase{
         // Looks up existing user in db
         UserEntity user = userRepository.findByUserName(username);
 
-        boolean userExists = (user != null);
+        UserResponse response;
 
-        // Build gRPC-answer
-        UserResponse response = UserResponse.newBuilder()
-                .setExists(userExists)
-                .build();
+        // If user exists, build answer with ID and userinfo
+        if (user != null) {
+            response = UserResponse.newBuilder()
+                    .setExists(true)
+                    .setId(user.getId())
+                    .setName(user.getName())
+                    .setUsername(user.getUsername())
+                    .build();
+        } else {
+            // if not, exists = false
+            response = UserResponse.newBuilder()
+                    .setExists(false)
+                    .build();
+        }
 
         // Sends back answer to MessageService
         responseObserver.onNext(response);

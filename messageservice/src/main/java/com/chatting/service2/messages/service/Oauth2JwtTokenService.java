@@ -1,4 +1,4 @@
-package com.chatting.service2.messages;
+package com.chatting.service2.messages.service;
 
 
 import org.springframework.security.core.Authentication;

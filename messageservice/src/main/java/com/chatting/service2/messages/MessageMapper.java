@@ -32,6 +32,8 @@ public class MessageMapper {
         return new ReceiveMessageDTO(
                message.getId(),
                 message.getUsername(),
+                message.getUserId(),
+                message.getName(),
                 message.getContent(),
                 message.getCreatedAt()
 
