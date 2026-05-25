@@ -32,6 +32,10 @@ public class UserInitilizer implements CommandLineRunner {
                     "demo",
                     passwordEncoder.encode("demo"),
                     List.of("user")));
+            userRepository.save(new UserEntity("authsystem",
+                    "auth-service-client",
+                    passwordEncoder.encode("secretPassword"),
+                    List.of("system")));
         }else {
             log.info(" -- NO DATA FILL WAS NECESSARY -- ");
         }

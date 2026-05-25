@@ -26,6 +26,9 @@ public class SecurityConfig {
 
         RestClient client = RestClient.builder()
                 .baseUrl(userServiceAdress)
+                .defaultRequest(request ->
+                        request.headers(headers ->
+                                headers.setBasicAuth("auth-service-client", "secretpassword")))
                 .build();
 
         return username -> {
@@ -33,7 +36,7 @@ public class SecurityConfig {
                 System.out.println("-- Trying RestClient -- ");
                 UserDto userDto = client
                         .get()
-                        .uri("/{username}", username)
+                        .uri("api/users/{username}", username)
                         .retrieve()
                         .body(UserDto.class);
                 if (userDto == null) {
@@ -48,11 +51,11 @@ public class SecurityConfig {
                         .roles(userDto.roles().toArray((new String[0])))
                         .build();
             } catch (RestClientException e){
-                log.error("Failed to fetch user details");
-                throw new RuntimeException("Error fetching user details"+ e);
+                log.error("-- Failed to fetch user details --" + e.getMessage());
+                throw new RuntimeException("Error fetching user details " + e.getStackTrace());
             }catch (Exception e) {
                 log.error("General expetion in userDetails service.");
-                throw new UsernameNotFoundException("Could not find account " + e);
+                throw new UsernameNotFoundException("Could not find account " + e.getStackTrace());
             }
         };
     }

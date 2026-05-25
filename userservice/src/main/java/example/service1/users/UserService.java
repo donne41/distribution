@@ -68,4 +68,7 @@ public class UserService {
     }
 
 
+    public Boolean userExits(String username) {
+        return repository.existsByUserName(username);
+    }
 }

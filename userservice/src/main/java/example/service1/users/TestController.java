@@ -61,5 +61,14 @@ public class TestController {
                 .build();
     }
 
+    @PostMapping("/find/{username}")
+    public ResponseEntity<String> findUser(@PathVariable String username){
+        System.out.println("-- Post for user: " + username + " --");
+        var userExists = userService.userExits(username);
+        if(userExists){
+            return new ResponseEntity<>("",HttpStatus.FOUND);
+        }else return new ResponseEntity<>("", HttpStatus.NOT_FOUND);
+    }
+
 
 }
