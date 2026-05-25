@@ -2,7 +2,8 @@ package com.chatting.service2.messages;
 
 import com.chatting.service2.messages.dto.CreateMessageDTO;
 import com.chatting.service2.messages.dto.ReceiveMessageDTO;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import io.grpc.CallCredentials;
+import io.grpc.Status;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,7 +11,9 @@ import com.chatting.grpc.message.UserServiceGrpc;
 import com.chatting.grpc.message.UserRequest;
 import com.chatting.grpc.message.UserResponse;
 
+import io.grpc.Metadata;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 @Service
 public class MessageService {
@@ -19,17 +22,20 @@ public class MessageService {
     private final MessageMapper messageMapper;
 
     private final UserServiceGrpc.UserServiceBlockingStub stub;
+    private final Oauth2JwtTokenService tokenService;
 
 
 
-    //@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    public MessageService(MessageRepository messageRepository, MessageMapper messageMapper, UserServiceGrpc.UserServiceBlockingStub stub) {
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    public MessageService(MessageRepository messageRepository, MessageMapper messageMapper,
+                          UserServiceGrpc.UserServiceBlockingStub stub, Oauth2JwtTokenService tokenService) {
         this.messageRepository = messageRepository;
         this.messageMapper = messageMapper;
         this.stub = stub;
+        this.tokenService = tokenService;
     }
 
-    // Todo: skicka med och validera användare
+
     @Transactional
     public ReceiveMessageDTO saveMessage(CreateMessageDTO messageRequest) {
 
@@ -37,17 +43,35 @@ public class MessageService {
             throw new IllegalArgumentException("Message cannot be empty");
         }
 
-        // gRPC CALL --> Get username from UserService to verify user exists before message is saved in DB
+        String token = tokenService.getAccessToken();
+        UserServiceGrpc.UserServiceBlockingStub authenticatedStub = this.stub.withCallCredentials(new CallCredentials() {
 
-//        UserRequest grpcRequest = UserRequest.newBuilder()
-//                .setUsername(messageRequest.username()) // uses field från CreateMessageDTO
-//                .build();
-//
-//        UserResponse grpcResponse = stub.validateUser(grpcRequest);
-//
-//        if (!grpcResponse.getExists()) {
-//            throw new IllegalArgumentException("User " + messageRequest.username() + " does not exist!");
-//        }
+            // Create authenticated stub with token through CallCredentials
+            @Override
+            public void applyRequestMetadata(RequestInfo requestInfo, Executor appExecutor, MetadataApplier metadataApplier) {
+                appExecutor.execute(() -> {
+                    try {
+                        Metadata headers = new Metadata();
+                        Metadata.Key<String> authKey = Metadata.Key.of("Authorization", Metadata.ASCII_STRING_MARSHALLER);
+                        headers.put(authKey, "Bearer " + token);
+                        metadataApplier.apply(headers);
+                    }        catch (Throwable e){
+                        metadataApplier.fail(Status.UNAUTHENTICATED.withCause(e));
+                    }
+                });
+            }
+        });
+
+        // gRPC call
+        UserRequest grpcRequest = UserRequest.newBuilder()
+                .setUsername(messageRequest.username())
+                .build();
+
+        UserResponse grpcResponse = authenticatedStub.validateUser(grpcRequest);
+
+        if (!grpcResponse.getExists()) {
+            throw new IllegalArgumentException ("User " + messageRequest.username() + " does not exist!");
+        }
 
         Message message = messageMapper.toEntity(messageRequest);
         message = messageRepository.save(message);

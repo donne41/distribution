@@ -3,6 +3,7 @@ package example.service1;
 import example.grpc.user.UserRequest;
 import example.grpc.user.UserResponse;
 import example.grpc.user.UserServiceGrpc;
+import example.service1.users.UserEntity;
 import example.service1.users.UserRepository;
 import io.grpc.stub.StreamObserver;
 import org.springframework.grpc.server.service.GrpcService;
@@ -19,11 +20,13 @@ public class GrpcServerService extends UserServiceGrpc.UserServiceImplBase{
 
     @Override
     public void validateUser(UserRequest request, StreamObserver<UserResponse> responseObserver) {
-        //
+
         String username = request.getUsername();
 
-        // Todo: Add logic to verify user --> t.ex. userRepository.existsByUsername(username)
-        boolean userExists = true; // Hard coded solution for now to verify call
+        // Looks up existing user in db
+        UserEntity user = userRepository.findByUserName(username);
+
+        boolean userExists = (user != null);
 
         // Build gRPC-answer
         UserResponse response = UserResponse.newBuilder()

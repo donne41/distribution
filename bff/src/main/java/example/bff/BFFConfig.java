@@ -60,7 +60,7 @@ public class BFFConfig {
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
 
-                        .ignoringRequestMatchers("/api/**") // Tillåt tillfälligt PUT/POST-anrop till API-endpoints utan X-XSRF-TOKEN header
+                        .ignoringRequestMatchers("/api/**") // Tillåt tillfälligt PUT/POST-anrop till API-endpoints utan X-XSRF-TOKEN header för test i Insomnia
                 )
                 .build();
     }
