@@ -45,7 +45,9 @@ public class BFFConfig {
         return http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/chatup/**", "/css/**", "/login/**").permitAll()
-                        .requestMatchers("/", "/api/test2").authenticated()
+
+                        .requestMatchers("/", "/api/messages").authenticated()
+
                         .anyRequest().authenticated())
                 // enable oauth2 login
                 .oauth2Login(Customizer.withDefaults())
@@ -60,7 +62,8 @@ public class BFFConfig {
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
 
-                        .ignoringRequestMatchers("/api/**") // Tillåt tillfälligt PUT/POST-anrop till API-endpoints utan X-XSRF-TOKEN header för test i Insomnia
+                        // Tillåt tillfälligt PUT/POST-anrop till API-endpoints utan X-XSRF-TOKEN header för test i Insomnia
+                        .ignoringRequestMatchers("/api/**")
                 )
                 .build();
     }
@@ -106,45 +109,43 @@ public class BFFConfig {
                 .build();
     }
 
-    @Bean
-    public RouterFunction<ServerResponse> route2() {
-        // /api/test2 -> http://localhost:8082/api/test
+//    @Bean
+//    public RouterFunction<ServerResponse> route2() {
+//        // /api/test2 -> http://localhost:8082/api/test
+//
+//        return route()
+//                .GET("/api/test2", http())
+//                .before(request -> {
+//                    LOG.info("Incoming request for route 2 to port 8082");
+//                    LOG.info("URI Before: " + request.uri());
+//                    return request;
+//                })
+//                .before(uri("http://localhost:8082/"))
+//                .before(setPath("/api/test"))
+//                .before(request -> {
+//                            LOG.info("URI After: " + request.uri());
+//                            return request;
+//                        }
+//                )
+//                .filter(tokenRelay())
+//                .build();
+//    }
 
+    // Wildcard Route --> matches all HTTP methods (GET,POST...) in Message Service
+    @Bean
+    public RouterFunction<ServerResponse> messageServiceRoute() {
         return route()
-                .GET("/api/test2", http())
+                .route(request -> request.uri().getPath().startsWith("/api/messages"), http())
+                .before(uri("http://localhost:8082"))
                 .before(request -> {
-                    LOG.info("Incoming request for route 2 to port 8082");
-                    LOG.info("URI Before: " + request.uri());
+                    LOG.info("Incoming {} request to Message Service", request.method());
                     return request;
                 })
-                .before(uri("http://localhost:8082/"))
-                .before(setPath("/api/test"))
-                .before(request -> {
-                            LOG.info("URI After: " + request.uri());
-                            return request;
-                        }
-                )
                 .filter(tokenRelay())
                 .build();
     }
 
-    @Bean
-    public RouterFunction<ServerResponse> routeGetMessages() {
-        return route()
-                .GET("/api/messages", http())
-                .before(uri("http://localhost:8082"))
-                .filter(tokenRelay())
-                .build();
-    }
 
-    @Bean
-    public RouterFunction<ServerResponse> routePostMessage() {
-        return route()
-                .POST("/api/messages", http())
-                .before(uri("http://localhost:8082"))
-                .filter(tokenRelay())
-                .build();
-    }
 
     @Bean
     public RouterFunction<ServerResponse> route3() {

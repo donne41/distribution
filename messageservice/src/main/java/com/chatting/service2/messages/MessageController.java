@@ -15,7 +15,6 @@ public class MessageController {
 
     private final MessageService messageService;
 
-
     public MessageController(MessageService messageService) {
         this.messageService = messageService;
     }
