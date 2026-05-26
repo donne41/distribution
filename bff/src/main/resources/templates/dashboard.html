@@ -1,17 +1,130 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Dashboard</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>MicroChat</title>
+    <link rel="stylesheet" href="../static/css/style.css" th:href="@{/css/style.css}">
 </head>
 <body>
-<h1>Welcome to dashboard!</h1>
+
+<h1 class="hero-text">Microservice <br>Distributed Chat</h1>
 
 <form th:action="@{/logout}" method="post">
     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
     <button type="submit">Sign Out</button>
 </form>
+
+<div class="app-container">
+
+    <main class="chat-window">
+
+        <div id="messages">
+            <!-- Messages-->
+        </div>
+
+        <div class="input-wrapper">
+
+            <input type="text" id="message-input" aria-label="Chat message"
+                   placeholder="Enter your message...">
+            <button type="button" class="send-btn" aria-label="Send message"
+                    onclick="sendMessage()">↑</button>
+        </div>
+    </main>
+</div>
+
+<script>
+
+    // Körs när sidan laddas, för att hämta gamla meddelanden
+    document.addEventListener("DOMContentLoaded", () => {
+        loadMessages();
+
+    });
+
+    async function loadMessages() {
+        try {
+            const response = await fetch('/api/messages');
+            if (response.ok) {
+                const messages = await response.json();
+
+              document.getElementById('messages').innerHTML = '';
+
+              messages.forEach(msg => {
+                  // För placering av meddelanden vänster/höger i chatten
+                  const senderClass = (msg.username === 'demo') ? 'user' : 'bot';
+                  appendMessage(msg.content, senderClass, msg.username, msg.createdAt);
+              });
+            }
+        } catch (error) {
+            console.error("Failed to load messages:", error);
+        }
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('message-input');
+        const messageText = input.value.trim();
+
+        if (!messageText) return;
+
+        // show message in UI directly to user
+        appendMessage(messageText, 'user', 'demo');
+        input.value = ''; // clears input field
+
+        // Sends message to Message Service trough BFF-gateway
+        try {
+            const response = await fetch('/api/messages', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    username: "demo", // Todo: Ersätt me dynamiskt inloggad användare sen!
+                    content: messageText,
+                    createdAt: new Date().toISOString()  // För att LocalDateTime ska kunnas tolkas rätt
+                })
+            });
+
+            if (!response.ok) {
+                console.error("Server responded with an error:", response.status);
+            }
+        } catch (error) {
+            console.error("Failed to send message to BFF:", error);
+        }
+    }
+
+    function appendMessage(text, senderClass, username, timestamp) {
+        const messagesContainer = document.getElementById('messages');
+
+        // MessageContainer
+        const messageBlock = document.createElement('div');
+        messageBlock.classList.add('message-block', senderClass);
+
+        // Metainfo (Username + timestamp)
+        const metaDiv = document.createElement('div');
+        metaDiv.classList.add('message-meta');
+
+        // If timestamp is missing (for new messages), create a new one
+        const time = timestamp ? new Date(timestamp) : new Date();
+        const formattedDate = time.toLocaleDateString([], {day: 'numeric', month: 'short'});
+        const formattedTime = time.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+
+        metaDiv.innerText = `${username} • ${formattedDate} ${formattedTime}`;
+
+        const msgDiv = document.createElement('div');
+        msgDiv.classList.add('message', senderClass);
+        msgDiv.innerText = text;
+
+        messageBlock.appendChild(metaDiv);
+        messageBlock.appendChild(msgDiv);
+        messagesContainer.appendChild(messageBlock);
+
+        messagesContainer.scrollTo({
+            top: messages.scrollHeight,
+            behavior: 'smooth'
+        });
+
+    }
+
+
+
+</script>
 
 </body>
 </html>
