@@ -8,11 +8,17 @@
 
 <h1 class="hero-text">Microservice <br>Distributed Chat</h1>
 
-<form th:action="@{/logout}" method="post">
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+<div class="nav-container">
+    <a href="/account" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        My Account
+    </a>
 
-    <button type="submit">Sign Out</button>
-</form>
+    <form th:action="@{/logout}" method="post" class="logout-form">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit">Sign Out</button>
+    </form>
+</div>
 
 <div class="app-container">
 
@@ -34,7 +40,7 @@
 
 <script>
 
-    // Körs när sidan laddas, för att hämta gamla meddelanden
+    // När sidan laddas, hämta alla existerande meddelanden från databasen
     document.addEventListener("DOMContentLoaded", () => {
         loadMessages();
 
@@ -121,8 +127,6 @@
         });
 
     }
-
-
 
 </script>
 
