@@ -206,6 +206,29 @@ public class BFFConfig {
                 })
                 .build();
     }
+    @Bean
+    public RouterFunction<ServerResponse> routeToSignUpPage() {
+        return RouterFunctions.route()
+                .GET("/signup", request -> {
+
+                    UserDto newUser = new UserDto("","", List.of(), "");
+                    // Add stuffs to model just like in the controller addAttribute
+                    Map<String, Object> model = Stream.of(
+                                    Map.entry("userDto", newUser))
+                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+                    return ServerResponse.ok()
+                            .render("signup", model);
+                })
+                .build();
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> routePostCreateNewuser(){
+        return route()
+                .POST("/signup", http())
+                .before(uri(userServiceAdress))
+    }
 
     // Flytta till Authservice
     private LogoutSuccessHandler oidcLogoutSuccessHandler(ClientRegistrationRepository clientRegistrationRepository) {
@@ -237,6 +260,24 @@ public class BFFConfig {
     public RouterFunction<ServerResponse> routePostNewuser(){
         return route()
                 .POST("/get/users", http())
+                .before(uri(userServiceAdress))
+                .filter(tokenRelay())
+                .build();
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> routeGetUserDetail(){
+        return route()
+                .GET("/api/users", http())
+                .before(uri(userServiceAdress))
+                .filter(tokenRelay())
+                .build();
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> routeToFindUser(){
+        return route()
+                .POST("/find/**", http())
                 .before(uri(userServiceAdress))
                 .filter(tokenRelay())
                 .build();

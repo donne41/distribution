@@ -69,6 +69,15 @@ public class TestController {
             return new ResponseEntity<>("",HttpStatus.FOUND);
         }else return new ResponseEntity<>("", HttpStatus.NOT_FOUND);
     }
+    //TODO Redo so that the sign uip is on the bff and check if user exists happens in userservice instead.
+    @PostMapping("/signup")
+    public String saveNewUser(@RequestBody CreateUserDto newUser){
+        System.out.println("Auth controller running");
+        if(service.usernameExists(newUser.username()))
+            return "redirect:/signup";
+        service.saveNewUser(newUser);
+        return "redirect:/login";
+    }
 
 
 }

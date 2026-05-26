@@ -3,6 +3,7 @@ package example.authservice;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -13,17 +14,16 @@ public class AuthService {
 
     @Value("${user.service.address}")
     private String userServiceAddress;
+    @Value("${bff.service.address}")
+    private String bffAddress;
 
     private final RestClient userClient = RestClient.builder()
-            .baseUrl(userServiceAddress)
-            .defaultRequest(request ->
-                    request.headers(headers ->
-                            headers.setBasicAuth("auth-service-client",
-                                    "$2a$10$Evh5MQr5BG/khb2lQfdbneXEyps9GZn2gZardi3mUb/kc4oEOE0qS"))
-            ).build();
+            .baseUrl(bffAddress)
+            .build();
 
     public boolean usernameExists(String username) {
         System.out.println("-- Checking already exists --");
+
 
         var result = userClient.post()
                 .uri("/find/{username}", username)

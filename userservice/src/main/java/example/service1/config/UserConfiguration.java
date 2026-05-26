@@ -29,7 +29,7 @@ public class UserConfiguration {
                         auth -> auth
                                 .requestMatchers(HttpMethod.GET, "/api/users/**", "/error", "/get/**")
                                 .permitAll()
-                                .requestMatchers("/find/**").hasRole("SYSTEM")
+                                //.requestMatchers("/find/**").hasRole("SYSTEM")
                                 .anyRequest().authenticated()
                 )
                 // read token relay
@@ -45,20 +45,20 @@ public class UserConfiguration {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public UserDetailsService userDetailsService(UserRepository repository) {
-        return username -> {
-            UserEntity user = repository.findByUserName(username);
-            if (user == null) throw new UsernameNotFoundException("User not found!");
-            System.out.println("-- UserDetails in userService --");
-            System.out.printf("""
-                    Username: %s
-                    password: %s """, user.getUsername(), user.getPassword());
-            return User.withUsername(user.getUsername())
-                    .password(user.getPassword())
-                    .roles(user.getAuthAsList().toArray(new String[1]))
-                    .build();
-        };
-    }
+//    @Bean
+//    public UserDetailsService userDetailsService(UserRepository repository) {
+//        return username -> {
+//            UserEntity user = repository.findByUserName(username);
+//            if (user == null) throw new UsernameNotFoundException("User not found!");
+//            System.out.println("-- UserDetails in userService --");
+//            System.out.printf("""
+//                    Username: %s
+//                    password: %s """, user.getUsername(), user.getPassword());
+//            return User.withUsername(user.getUsername())
+//                    .password(user.getPassword())
+//                    .roles(user.getAuthAsList().toArray(new String[1]))
+//                    .build();
+//        };
+//    }
 
 }

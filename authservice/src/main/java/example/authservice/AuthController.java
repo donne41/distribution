@@ -21,10 +21,8 @@ public class AuthController {
     }
 
     @GetMapping("/signup")
-    public String signUpPage(
-            Model model){
-        model.addAttribute("newUser", new CreateUserDto());
-        return "signup";
+    public String signUpPage(){
+        return "redirect:/localhost:8080/signup";
     }
 
     @PostMapping("/signup")

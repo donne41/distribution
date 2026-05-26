@@ -18,6 +18,8 @@ public class SecurityConfig {
 
     @Value("${user.service.address}")
     private String userServiceAdress;
+    @Value("${bff.service.address}")
+    private String bffAddress;
     private Logger log = LoggerFactory.getLogger(SecurityConfig.class);
 
 
@@ -25,10 +27,7 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
 
         RestClient client = RestClient.builder()
-                .baseUrl(userServiceAdress)
-                .defaultRequest(request ->
-                        request.headers(headers ->
-                                headers.setBasicAuth("auth-service-client", "secretpassword")))
+                .baseUrl(bffAddress)
                 .build();
 
         return username -> {
@@ -59,4 +58,5 @@ public class SecurityConfig {
             }
         };
     }
+
 }
