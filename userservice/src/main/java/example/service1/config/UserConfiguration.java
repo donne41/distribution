@@ -21,7 +21,7 @@ public class UserConfiguration {
                 )
                 .authorizeHttpRequests(
                         auth -> auth
-                                .requestMatchers(HttpMethod.GET, "/api/users/**", "/error", "/get/**")
+                                .requestMatchers(HttpMethod.GET, "/api/users/**", "/error", "/get/**", "/css/**", "/static/**")
                                 .permitAll()
                                 .requestMatchers("/signup").permitAll()
                                 //.requestMatchers("/find/**").hasRole("SYSTEM")
@@ -34,26 +34,11 @@ public class UserConfiguration {
                 );
         return http.build();
     }
-     //TODO Krock med inlogg för demo demo och authservice inloggning med httpbasic
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-//    @Bean
-//    public UserDetailsService userDetailsService(UserRepository repository) {
-//        return username -> {
-//            UserEntity user = repository.findByUserName(username);
-//            if (user == null) throw new UsernameNotFoundException("User not found!");
-//            System.out.println("-- UserDetails in userService --");
-//            System.out.printf("""
-//                    Username: %s
-//                    password: %s """, user.getUsername(), user.getPassword());
-//            return User.withUsername(user.getUsername())
-//                    .password(user.getPassword())
-//                    .roles(user.getAuthAsList().toArray(new String[1]))
-//                    .build();
-//        };
-//    }
 
 }

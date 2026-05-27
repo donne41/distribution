@@ -1,5 +1,6 @@
 package example.authservice;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,9 @@ public class AuthController {
 
     private AuthService service;
 
+    @Value("${bff.service.address}")
+    private String bffAddress;
+
     @GetMapping("/login")
     public String loginPage() {
         return "login";
@@ -23,7 +27,7 @@ public class AuthController {
     @GetMapping("/signup")
     public String signUpPage(){
         System.out.println("-- Redirecting from controller -- ");
-        return "redirect:http://localhost:8080/signup";
+        return "redirect:" + bffAddress + "/signup";
     }
 
 

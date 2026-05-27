@@ -26,19 +26,12 @@ public class UserService {
         return repository.findByUserName(username);
     }
 
-    public List<UserDto> getAllUsers() {
-        return repository.getAllUsers().stream().map(
-                mapper::userEntityToDto).toList();
-    }
-
-    public void saveUser(UserDto newUser) {
-        repository.save(mapper.userDtoToEntity(newUser));
-    }
 
     public void saveUser(CreateUserDto newUser) throws UsernameAlreadyExists {
         if (repository.existsByUserName(newUser.username())) {
             throw new UsernameAlreadyExists("Username is occupied!");
         }
+        System.out.println("Password: " + newUser.password());
         repository.save(mapper.userDtoToEntity(new UserDto(
                 newUser.username(),
                 newUser.password(),

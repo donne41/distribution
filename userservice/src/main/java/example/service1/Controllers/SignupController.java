@@ -5,6 +5,7 @@ import example.service1.users.CreateUserDto;
 import example.service1.services.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,6 +20,8 @@ public class SignupController {
     public SignupController(UserService userService){
         this.userService = userService;
     }
+    @Value("${bff.service.address}")
+    private String bffAddress;
 
 
     @GetMapping("/signup")
@@ -28,21 +31,17 @@ public class SignupController {
     }
 
     @PostMapping("/signup")
-    public String saveNewUser(@ModelAttribute("newUser") CreateUserDto newUser,
+    public String saveNewUser(@ModelAttribute("newUser") @Valid CreateUserDto newUser,
                               BindingResult result){
-        log.info("-- Starting saving process --");
         if(result.hasErrors()){
-            log.error("-- New user is invalid --");
             return "signup";
         }
         try {
             userService.saveUser(newUser);
-            log.info("-- USER SAVED --");
         }catch (UsernameAlreadyExists e){
-            log.error("-- result rejected -- ");
             result.rejectValue("username", "error.newUser", e.getMessage());
             return "signup";
         }
-        return "redirect://http:localhost:8080/";
+        return "redirect:" + bffAddress;
     }
 }

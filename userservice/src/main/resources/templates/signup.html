@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
-    <title>Sign In</title>
+    <title>New user</title>
 
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
@@ -32,11 +31,11 @@
         }
     </style>
 </head>
-<body>
+<body class="auth-body">
 
 <div class="container">
     <header>
-        <h1>Sign In</h1>
+        <h1>Sign Up</h1>
 
     </header>
 
@@ -50,6 +49,7 @@
 
     <form th:action="@{/signup}" th:object="${newUser}" method="post">
 
+
         <div class="form-group">
             <label for="username">Username</label>
             <input id="username" th:field="*{username}" placeholder="Enter your username" required autofocus>
@@ -58,7 +58,7 @@
 
         <div class="form-group">
             <label for="password">Password</label>
-            <input id="password" type="password" th:password="*{password()}" placeholder="Enter your password" required>
+            <input id="password" type="password" th:field="*{password}" placeholder="Enter your password" required>
             <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error"></span>
         </div>
 
@@ -71,7 +71,5 @@
     </form>
 
 </div>
-
-
 </body>
 </html>

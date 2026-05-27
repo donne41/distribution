@@ -56,22 +56,4 @@ public class TestController {
     }
 
 
-//    //TODO Redo so that the sign uip is on the bff and check if user exists happens in userservice instead.
-//    @PostMapping("/signup")
-//    public ResponseEntity<Void> saveNewUser(@ModelAttribute CreateUserDto newUser){
-//        System.out.println("User controller recived");
-//        if(userService.userExits(newUser.username())) {
-//            System.out.println("username Occupied");
-//            return ResponseEntity.status(HttpStatus.FOUND)
-//                    .location(URI.create("http://localhost:8080/signup"))
-//                    .build();
-//        }
-//        System.out.println("OK TO SAVE IN USER CONTROLLER");
-//            //userService.saveUser();
-//        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
-//                .location(URI.create("http://127.0.0.1:9000/login"))
-//                .build();
-//    }
-
-
 }

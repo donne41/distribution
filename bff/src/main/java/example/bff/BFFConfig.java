@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.*;
+import static org.springframework.cloud.gateway.server.mvc.filter.FilterFunctions.redirectTo;
 import static org.springframework.cloud.gateway.server.mvc.filter.FilterFunctions.stripPrefix;
 import static org.springframework.cloud.gateway.server.mvc.filter.TokenRelayFilterFunctions.tokenRelay;
 import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions.http;
@@ -60,7 +61,7 @@ public class BFFConfig {
                 .logout(logout -> logout
                         .logoutSuccessHandler(oidcLogoutSuccessHandler(clientRegistrationRepository))
                 )
-                // save csrf token for post request from diffrent modules
+//                 save csrf token for post request from diffrent modules
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
@@ -87,108 +88,6 @@ public class BFFConfig {
         };
     }
 
-    @Bean
-    public RouterFunction<ServerResponse> route1() {
-        // /api/test -> http://localhost:8081/api/test
-
-        return route()
-                .GET("/api/test", http())
-                .before(request -> {
-                    LOG.info("Incoming request for route 1 to port 8081");
-                    LOG.info("URI before: " + request.uri());
-                    return request;
-                })
-                .before(uri("http://" + userServiceAdress + ":8081/"))
-                // .before(setPath("/api/test")) Behövs inte för att uri är redan korrekt
-                .before(request -> {
-                            LOG.info("URI After: " + request.uri());
-                            return request;
-                        }
-                )
-                .filter(tokenRelay())
-                .build();
-    }
-
-    @Bean
-    public RouterFunction<ServerResponse> route2() {
-        // /api/test2 -> http://localhost:8082/api/test
-
-        return route()
-                .GET("/api/test2", http())
-                .before(request -> {
-                    LOG.info("Incoming request for route 2 to port 8082");
-                    LOG.info("URI Before: " + request.uri());
-                    return request;
-                })
-                .before(uri("http://localhost:8082/"))
-                .before(setPath("/api/test"))
-                .before(request -> {
-                            LOG.info("URI After: " + request.uri());
-                            return request;
-                        }
-                )
-                .filter(tokenRelay())
-                .build();
-    }
-
-    @Bean
-    public RouterFunction<ServerResponse> route3() {
-        // /api/test3 -> localhost:8083
-
-        return route()
-                .GET("/api/test3", http())
-                .before(request -> {
-                    LOG.info("Incoming request for route 3 to port 8083");
-                    return request;
-                })
-                .before(uri("http://localhost:8083"))
-                .before(setPath("/api/test"))
-                .filter(tokenRelay())
-                .build();
-    }
-
-    @Bean
-    public RouterFunction<ServerResponse> routeToChat() {
-
-        return route()
-                .GET("/api/chat/**", http())
-                .before(request -> {
-                    LOG.info("Request to ChatAi: {}", request.uri().getPath());
-                    return request;
-                })
-                .before(uri("http://localhost:8090"))
-                .filter(stripPrefix(2))
-                .filter(tokenRelay())
-                .build();
-    }
-
-    @Bean
-    public RouterFunction<ServerResponse> routeConfigurationForChat() {
-
-        return route()
-                .GET("/chatup/**", http())
-                .before(request -> {
-                    LOG.info("Request to api");
-                    return request;
-                })
-                .before(uri("http://localhost:8090"))
-                .filter(tokenRelay())
-                .build();
-    }
-
-    @Bean
-    public RouterFunction<ServerResponse> routeForPostChat() {
-
-        return route()
-                .POST("/api/v1/chat", http())
-                .before(request -> {
-                    LOG.info("Post from chat ai {}", request.uri().getPath());
-                    return request;
-                })
-                .before(uri("http://localhost:8090"))
-                .filter(tokenRelay())
-                .build();
-    }
 
     @Bean
     public RouterFunction<ServerResponse> routeToDashBoard() {
@@ -199,21 +98,6 @@ public class BFFConfig {
                 })
                 .build();
     }
-//    @Bean
-//    public RouterFunction<ServerResponse> routeToSignUpPage() {
-//        return RouterFunctions.route()
-//                .GET("/signup", request -> {
-//
-//                    CreateUserDto newUser = new CreateUserDto();
-//                    // Add stuffs to model just like in the controller addAttribute
-//                    Map<String, Object> model = Stream.of(
-//                                    Map.entry("newUser", newUser))
-//                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-//                    return ServerResponse.ok()
-//                            .render("signup", model);
-//                })
-//                .build();
-//    }
 
     @Bean
     public RouterFunction<ServerResponse> routeToSignupPage(){
@@ -228,6 +112,7 @@ public class BFFConfig {
         return route()
                 .POST("/signup", http())
                 .before(uri(userServiceAdress))
+                .filter(tokenRelay())
                 .build();
     }
 
