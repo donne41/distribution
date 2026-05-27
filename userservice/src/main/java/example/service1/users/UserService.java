@@ -16,11 +16,11 @@ import java.util.List;
 public class UserService {
 
     private UserRepository repository;
-    private PasswordEncoder encoder;
+    private UserMapper mapper;
 
-    public UserService(UserRepository repository, PasswordEncoder encoder) {
+    public UserService(UserRepository repository, UserMapper mapper) {
         this.repository = repository;
-        this.encoder = encoder;
+        this.mapper = mapper;
     }
 
     public String getNameFromUsername(String username) {
@@ -30,18 +30,6 @@ public class UserService {
         return nameEntity.getName();
     }
 
-    private UserDto userEntityToDto(UserEntity user) {
-        return new UserDto(user.getUsername(),
-                "", user.getAuthAsList(),
-                user.getName());
-    }
-
-    private UserEntity userDtoToEntity(UserDto user) {
-        return new UserEntity(user.name(),
-                user.username(),
-                encoder.encode(user.password()),
-                user.roles());
-    }
 
     public UserEntity findUser(String username) {
         return repository.findByUserName(username);
@@ -49,11 +37,11 @@ public class UserService {
 
     public List<UserDto> getAllUsers() {
         return repository.getAllUsers().stream().map(
-                this::userEntityToDto).toList();
+                mapper::userEntityToDto).toList();
     }
 
     public void saveUser(UserDto newUser) {
-        repository.save(userDtoToEntity(newUser));
+        repository.save(mapper.userDtoToEntity(newUser));
     }
 
     public void deleteUser(Long userId) {

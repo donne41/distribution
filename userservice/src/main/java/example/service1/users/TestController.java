@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -69,14 +70,27 @@ public class TestController {
             return new ResponseEntity<>("",HttpStatus.FOUND);
         }else return new ResponseEntity<>("", HttpStatus.NOT_FOUND);
     }
+//    @GetMapping("/signup")
+//    public String loadSignupPage(Model model){
+//        model.addAttribute("newUser", new CreateUserDto());
+//        return "signup"
+//    }
+
     //TODO Redo so that the sign uip is on the bff and check if user exists happens in userservice instead.
     @PostMapping("/signup")
-    public String saveNewUser(@RequestBody CreateUserDto newUser){
-        System.out.println("Auth controller running");
-        if(service.usernameExists(newUser.username()))
-            return "redirect:/signup";
-        service.saveNewUser(newUser);
-        return "redirect:/login";
+    public ResponseEntity<Void> saveNewUser(@ModelAttribute CreateUserDto newUser){
+        System.out.println("User controller recived");
+        if(userService.userExits(newUser.username())) {
+            System.out.println("username Occupied");
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .location(URI.create("http://localhost:8080/signup"))
+                    .build();
+        }
+        System.out.println("OK TO SAVE IN USER CONTROLLER");
+            //userService.saveUser();
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create("http://127.0.0.1:9000/login"))
+                .build();
     }
 
 

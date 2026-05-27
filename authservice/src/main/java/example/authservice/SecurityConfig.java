@@ -27,7 +27,7 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
 
         RestClient client = RestClient.builder()
-                .baseUrl(bffAddress)
+                .baseUrl(userServiceAdress)
                 .build();
 
         return username -> {

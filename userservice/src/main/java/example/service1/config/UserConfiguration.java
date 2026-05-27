@@ -29,6 +29,7 @@ public class UserConfiguration {
                         auth -> auth
                                 .requestMatchers(HttpMethod.GET, "/api/users/**", "/error", "/get/**")
                                 .permitAll()
+                                .requestMatchers("/signup").permitAll()
                                 //.requestMatchers("/find/**").hasRole("SYSTEM")
                                 .anyRequest().authenticated()
                 )

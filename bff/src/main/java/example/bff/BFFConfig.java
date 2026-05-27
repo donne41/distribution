@@ -49,7 +49,7 @@ public class BFFConfig {
     SecurityFilterChain security(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) {
         return http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/chatup/**", "/css/**", "/login/**").permitAll()
+                        .requestMatchers("/chatup/**", "/css/**", "/login/**", "/signup").permitAll()
                         .requestMatchers("/", "/api/test2").authenticated()
                         .anyRequest().authenticated())
                 // enable oauth2 login
@@ -211,12 +211,11 @@ public class BFFConfig {
         return RouterFunctions.route()
                 .GET("/signup", request -> {
 
-                    UserDto newUser = new UserDto("","", List.of(), "");
+                    CreateUserDto newUser = new CreateUserDto();
                     // Add stuffs to model just like in the controller addAttribute
                     Map<String, Object> model = Stream.of(
-                                    Map.entry("userDto", newUser))
+                                    Map.entry("newUser", newUser))
                             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
                     return ServerResponse.ok()
                             .render("signup", model);
                 })
@@ -228,6 +227,8 @@ public class BFFConfig {
         return route()
                 .POST("/signup", http())
                 .before(uri(userServiceAdress))
+                .filter(tokenRelay())
+                .build();
     }
 
     // Flytta till Authservice
