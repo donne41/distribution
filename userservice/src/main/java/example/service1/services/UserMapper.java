@@ -1,5 +1,7 @@
-package example.service1.users;
+package example.service1.services;
 
+import example.service1.users.UserDto;
+import example.service1.users.UserEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -13,13 +15,11 @@ public class UserMapper {
 
     public UserDto userEntityToDto(UserEntity user) {
         return new UserDto(user.getUsername(),
-                "", user.getAuthAsList(),
-                user.getName());
+                "", user.getAuthAsList());
     }
 
     public UserEntity userDtoToEntity(UserDto user) {
-        return new UserEntity(user.name(),
-                user.username(),
+        return new UserEntity(user.username(),
                 encoder.encode(user.password()),
                 user.roles());
     }

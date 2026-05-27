@@ -1,11 +1,14 @@
-package example.service1.users;
+package example.service1.Controllers;
 
+import example.service1.users.CreateUserDto;
+import example.service1.users.UserDto;
+import example.service1.users.UserEntity;
+import example.service1.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -34,32 +37,13 @@ public class TestController {
         return new UserDto(
                 user.getUsername(),
                 user.getPassword(),
-                user.getAuthAsList(),
-                user.getName());
+                user.getAuthAsList());
     }
 
     @GetMapping("/get/token")
     public String getClientName(@AuthenticationPrincipal Jwt jwt) {
         String token = jwt.getTokenValue().toLowerCase();
         return "HELLO FROM USER, here is token: " + token;
-    }
-
-    @GetMapping("/get/users")
-    public List<UserDto> getAllUsers() {
-        return userService.getAllUsers();
-    }
-
-    @PostMapping("/get/users")
-    public ResponseEntity<Void> saveUser(
-            @RequestParam("name") String name,
-            @RequestParam("username") String username,
-            @RequestParam("password") String password,
-            @RequestParam("roles") String roles
-    ) {
-        userService.saveUser(new UserDto(username, password, List.of(roles), name));
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .location(URI.create("/"))
-                .build();
     }
 
     @PostMapping("/find/{username}")
@@ -70,28 +54,24 @@ public class TestController {
             return new ResponseEntity<>("",HttpStatus.FOUND);
         }else return new ResponseEntity<>("", HttpStatus.NOT_FOUND);
     }
-//    @GetMapping("/signup")
-//    public String loadSignupPage(Model model){
-//        model.addAttribute("newUser", new CreateUserDto());
-//        return "signup"
-//    }
 
-    //TODO Redo so that the sign uip is on the bff and check if user exists happens in userservice instead.
-    @PostMapping("/signup")
-    public ResponseEntity<Void> saveNewUser(@ModelAttribute CreateUserDto newUser){
-        System.out.println("User controller recived");
-        if(userService.userExits(newUser.username())) {
-            System.out.println("username Occupied");
-            return ResponseEntity.status(HttpStatus.FOUND)
-                    .location(URI.create("http://localhost:8080/signup"))
-                    .build();
-        }
-        System.out.println("OK TO SAVE IN USER CONTROLLER");
-            //userService.saveUser();
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .location(URI.create("http://127.0.0.1:9000/login"))
-                .build();
-    }
+
+//    //TODO Redo so that the sign uip is on the bff and check if user exists happens in userservice instead.
+//    @PostMapping("/signup")
+//    public ResponseEntity<Void> saveNewUser(@ModelAttribute CreateUserDto newUser){
+//        System.out.println("User controller recived");
+//        if(userService.userExits(newUser.username())) {
+//            System.out.println("username Occupied");
+//            return ResponseEntity.status(HttpStatus.FOUND)
+//                    .location(URI.create("http://localhost:8080/signup"))
+//                    .build();
+//        }
+//        System.out.println("OK TO SAVE IN USER CONTROLLER");
+//            //userService.saveUser();
+//        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
+//                .location(URI.create("http://127.0.0.1:9000/login"))
+//                .build();
+//    }
 
 
 }

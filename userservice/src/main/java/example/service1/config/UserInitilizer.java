@@ -1,8 +1,7 @@
 package example.service1.config;
 
 import example.service1.users.UserEntity;
-import example.service1.users.UserRepository;
-import lombok.extern.slf4j.Slf4j;
+import example.service1.services.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -28,11 +27,11 @@ public class UserInitilizer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         if (userRepository.count() == 0) {
             log.info(" -- RUNNING DATA FILL --");
-            userRepository.save(new UserEntity("Clippy" ,
+            userRepository.save(new UserEntity(
                     "demo",
                     passwordEncoder.encode("demo"),
                     List.of("user")));
-            userRepository.save(new UserEntity("authsystem",
+            userRepository.save(new UserEntity(
                     "auth-service-client",
                     passwordEncoder.encode("secretPassword"),
                     List.of("system")));

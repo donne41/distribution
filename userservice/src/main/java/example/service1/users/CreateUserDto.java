@@ -1,6 +1,12 @@
 package example.service1.users;
 
-public record CreateUserDto(String username, String password) {
+import jakarta.validation.constraints.NotBlank;
+
+public record CreateUserDto(
+        @NotBlank
+        String username,
+        @NotBlank
+        String password) {
     public CreateUserDto(){
         this(null, null);
     }

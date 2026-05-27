@@ -1,13 +1,10 @@
-package example.service1.users;
+package example.service1.services;
 
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import example.service1.Exceptions.UsernameAlreadyExists;
+import example.service1.users.CreateUserDto;
+import example.service1.users.UserDto;
+import example.service1.users.UserEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,12 +20,6 @@ public class UserService {
         this.mapper = mapper;
     }
 
-    public String getNameFromUsername(String username) {
-        UserEntity nameEntity = repository.findByUserName(username);
-        if (nameEntity == null)
-            throw new RuntimeException("No user found");
-        return nameEntity.getName();
-    }
 
 
     public UserEntity findUser(String username) {
@@ -42,6 +33,18 @@ public class UserService {
 
     public void saveUser(UserDto newUser) {
         repository.save(mapper.userDtoToEntity(newUser));
+    }
+
+    public void saveUser(CreateUserDto newUser) throws UsernameAlreadyExists {
+        if (repository.existsByUserName(newUser.username())) {
+            throw new UsernameAlreadyExists("Username is occupied!");
+        }
+        repository.save(mapper.userDtoToEntity(new UserDto(
+                newUser.username(),
+                newUser.password(),
+                List.of("user"))
+                )
+        );
     }
 
     public void deleteUser(Long userId) {

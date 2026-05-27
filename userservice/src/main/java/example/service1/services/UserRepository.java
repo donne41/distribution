@@ -1,9 +1,8 @@
-package example.service1.users;
+package example.service1.services;
 
+import example.service1.users.UserEntity;
 import org.springframework.data.jpa.repository.NativeQuery;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 

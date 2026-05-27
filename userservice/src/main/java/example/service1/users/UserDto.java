@@ -9,7 +9,5 @@ public record UserDto(
         String username,
         @NotBlank
         String password,
-        List<String> roles,
-        @NotBlank
-        String name) {
-}
+        List<String> roles
+){}

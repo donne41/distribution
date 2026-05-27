@@ -194,31 +194,32 @@ public class BFFConfig {
     public RouterFunction<ServerResponse> routeToDashBoard() {
         return RouterFunctions.route()
                 .GET("/", request -> {
-
-                    UserDto newUser = new UserDto("","", List.of(), "");
-                    // Add stuffs to model just like in the controller addAttribute
-                    Map<String, Object> model = Stream.of(
-                            Map.entry("userDto", newUser))
-                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
                     return ServerResponse.ok()
-                            .render("dashboard", model);
+                            .render("dashboard");
                 })
                 .build();
     }
-    @Bean
-    public RouterFunction<ServerResponse> routeToSignUpPage() {
-        return RouterFunctions.route()
-                .GET("/signup", request -> {
+//    @Bean
+//    public RouterFunction<ServerResponse> routeToSignUpPage() {
+//        return RouterFunctions.route()
+//                .GET("/signup", request -> {
+//
+//                    CreateUserDto newUser = new CreateUserDto();
+//                    // Add stuffs to model just like in the controller addAttribute
+//                    Map<String, Object> model = Stream.of(
+//                                    Map.entry("newUser", newUser))
+//                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+//                    return ServerResponse.ok()
+//                            .render("signup", model);
+//                })
+//                .build();
+//    }
 
-                    CreateUserDto newUser = new CreateUserDto();
-                    // Add stuffs to model just like in the controller addAttribute
-                    Map<String, Object> model = Stream.of(
-                                    Map.entry("newUser", newUser))
-                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-                    return ServerResponse.ok()
-                            .render("signup", model);
-                })
+    @Bean
+    public RouterFunction<ServerResponse> routeToSignupPage(){
+        return route()
+                .GET("/signup", http())
+                .before(uri(userServiceAdress))
                 .build();
     }
 
@@ -227,7 +228,6 @@ public class BFFConfig {
         return route()
                 .POST("/signup", http())
                 .before(uri(userServiceAdress))
-                .filter(tokenRelay())
                 .build();
     }
 

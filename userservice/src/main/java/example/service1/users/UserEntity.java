@@ -24,21 +24,19 @@ public class UserEntity implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
-    private String name;
     private String userName;
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
 
 
-    public UserEntity(String name, String username, String password, List<String> roles) {
-        this.name = name;
+    public UserEntity(String username, String password, List<String> roles) {
         this.userName = username;
         this.password = password;
         this.authorities = setAuthoritesList(roles);
     }
 
     public UserEntity(String username, String password) {
-        this("", username, password, List.of("user"));
+        this(username, password, List.of("user"));
     }
 
     public UserEntity() {
@@ -54,9 +52,6 @@ public class UserEntity implements UserDetails {
         return password;
     }
 
-    public String getName() {
-        return name;
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

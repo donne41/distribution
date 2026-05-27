@@ -52,12 +52,14 @@
 
         <div class="form-group">
             <label for="username">Username</label>
-            <input id="username" type="text" name="username" placeholder="Enter your username" required autofocus>
+            <input id="username" th:field="*{username}" placeholder="Enter your username" required autofocus>
+            <span th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="error"></span>
         </div>
 
         <div class="form-group">
             <label for="password">Password</label>
-            <input id="password" type="password" name="password" placeholder="Enter your password" required>
+            <input id="password" type="password" th:password="*{password()}" placeholder="Enter your password" required>
+            <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error"></span>
         </div>
 
         <button type="submit" class="btn-submit">Sign Up</button>
