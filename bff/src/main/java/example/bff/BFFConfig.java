@@ -40,6 +40,9 @@ public class BFFConfig {
     @Value("${local.userservice}")
     private String userServiceAdress;
 
+    @Value("${local.messageservice:localhost}")
+    private String messageServiceAdress;
+
     @Bean
     SecurityFilterChain security(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) {
         return http
@@ -107,34 +110,14 @@ public class BFFConfig {
                 .build();
     }
 
-//    @Bean
-//    public RouterFunction<ServerResponse> route2() {
-//        // /api/test2 -> http://localhost:8082/api/test
-//
-//        return route()
-//                .GET("/api/test2", http())
-//                .before(request -> {
-//                    LOG.info("Incoming request for route 2 to port 8082");
-//                    LOG.info("URI Before: " + request.uri());
-//                    return request;
-//                })
-//                .before(uri("http://localhost:8082/"))
-//                .before(setPath("/api/test"))
-//                .before(request -> {
-//                            LOG.info("URI After: " + request.uri());
-//                            return request;
-//                        }
-//                )
-//                .filter(tokenRelay())
-//                .build();
-//    }
+
 
     // Wildcard Route --> matches all HTTP methods (GET,POST...) in Message Service
     @Bean
     public RouterFunction<ServerResponse> messageServiceRoute() {
         return route()
                 .route(request -> request.uri().getPath().startsWith("/api/messages"), http())
-                .before(uri("http://localhost:8082"))
+                .before(uri("http://" + messageServiceAdress + ":8082"))
                 .before(request -> {
                     LOG.info("Incoming {} request to Message Service", request.method());
                     return request;

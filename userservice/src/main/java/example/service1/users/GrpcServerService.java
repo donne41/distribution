@@ -1,10 +1,8 @@
-package example.service1;
+package example.service1.users;
 
 import example.grpc.user.UserRequest;
 import example.grpc.user.UserResponse;
 import example.grpc.user.UserServiceGrpc;
-import example.service1.users.UserEntity;
-import example.service1.users.UserRepository;
 import io.grpc.stub.StreamObserver;
 import org.springframework.grpc.server.service.GrpcService;
 

@@ -48,7 +48,6 @@ body {
     text-decoration: none;
     display: flex;
     align-items: center;
-    gap: 60px;
     gap: 8px;
     backdrop-filter: blur(10px);
     transition: all 0.2s ease;

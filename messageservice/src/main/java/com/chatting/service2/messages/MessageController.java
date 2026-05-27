@@ -3,6 +3,7 @@ package com.chatting.service2.messages;
 import com.chatting.service2.messages.dto.CreateMessageDTO;
 import com.chatting.service2.messages.dto.ReceiveMessageDTO;
 import com.chatting.service2.messages.service.MessageService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -28,7 +29,7 @@ public class MessageController {
 //    }
 
     @PostMapping()
-    public ResponseEntity<ReceiveMessageDTO> createMessage(@RequestBody CreateMessageDTO messageRequest,
+    public ResponseEntity<ReceiveMessageDTO> createMessage(@Valid @RequestBody CreateMessageDTO messageRequest,
                                                            @AuthenticationPrincipal Jwt jwt){
 
         ReceiveMessageDTO receiveMessage = messageService.saveMessage(messageRequest, jwt);

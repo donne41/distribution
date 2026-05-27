@@ -7,8 +7,8 @@ import com.chatting.service2.messages.dto.CreateMessageDTO;
 import com.chatting.service2.messages.dto.ReceiveMessageDTO;
 import io.grpc.CallCredentials;
 import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +22,7 @@ import io.grpc.Metadata;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -34,7 +35,6 @@ public class MessageService {
     private final Oauth2JwtTokenService tokenService;
 
 
-
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public MessageService(MessageRepository messageRepository, MessageMapper messageMapper,
                           UserServiceGrpc.UserServiceBlockingStub stub, Oauth2JwtTokenService tokenService) {
@@ -43,7 +43,6 @@ public class MessageService {
         this.stub = stub;
         this.tokenService = tokenService;
     }
-
 
     @Transactional
     public ReceiveMessageDTO saveMessage(CreateMessageDTO messageRequest, Jwt jwt) {
@@ -54,7 +53,7 @@ public class MessageService {
 
         // Get secure username from JWT
         String currentUsername = jwt.getSubject() != null ? jwt.getSubject() : jwt.getClaimAsString("sub");
-        log.info("Service received a message! Secure username: " + currentUsername);
+        log.debug("Service received a message");
 
         Message message = messageMapper.toEntity(messageRequest);
 
@@ -65,7 +64,9 @@ public class MessageService {
 
         // Get token and create authenticated stub through CallCredentials
         String token = tokenService.getAccessToken();
-        UserServiceGrpc.UserServiceBlockingStub authenticatedStub = this.stub.withCallCredentials(new CallCredentials() {
+        UserServiceGrpc.UserServiceBlockingStub authenticatedStub = this.stub
+                        .withDeadlineAfter(2, TimeUnit.SECONDS)
+                .withCallCredentials(new CallCredentials() {
 
             @Override
             public void applyRequestMetadata(RequestInfo requestInfo, Executor appExecutor, MetadataApplier metadataApplier) {
@@ -87,10 +88,15 @@ public class MessageService {
                 .setUsername(currentUsername)
                 .build();
 
-        UserResponse grpcResponse = authenticatedStub.validateUser(grpcRequest);
+        UserResponse grpcResponse;
+        try {
+            grpcResponse = authenticatedStub.validateUser(grpcRequest);
+        } catch (StatusRuntimeException e) {
+            throw new IllegalArgumentException ("User service validation failed", e);
+        }
 
         if (!grpcResponse.getExists()) {
-            throw new IllegalArgumentException ("User " + messageRequest.username() + " does not exist!");
+            throw new IllegalArgumentException ("User " + currentUsername + " does not exist!");
         }
 
         // Get details from gRPC-answer and add to message

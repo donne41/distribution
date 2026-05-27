@@ -16,7 +16,6 @@ public class MessageMapper {
        }
 
        Message message = new Message();
-       message.setUsername(dto.username());
        message.setContent(dto.content());
        message.setCreatedAt(LocalDateTime.now());
 
