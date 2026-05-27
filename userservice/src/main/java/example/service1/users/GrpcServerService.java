@@ -39,6 +39,14 @@ public class GrpcServerService extends UserServiceGrpc.UserServiceImplBase{
 
             // If user exists, build answer with ID and userinfo
             if (user != null) {
+                if (user.getId() == null || user.getName() == null || user.getUsername() == null) {
+                    responseObserver.onError(Status.INTERNAL
+                            .withDescription("User data is incomplete")
+                            .asRuntimeException());
+                    return;
+                }
+
+                log.debug("User validation successful: username={}, userId={}", username, user.getId());
                 response = UserResponse.newBuilder()
                         .setExists(true)
                         .setId(user.getId())
