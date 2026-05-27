@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.RouterFunctions;
@@ -54,7 +55,11 @@ public class BFFConfig {
                         .requestMatchers("/", "/api/test2").authenticated()
                         .anyRequest().authenticated())
                 // enable oauth2 login
+
                 .oauth2Login(Customizer.withDefaults())
+                .oauth2Login(oauth2 -> oauth2
+                        .defaultSuccessUrl("/", true))
+
                 //enable tokenRelay Oauth2 client
                 .oauth2Client(Customizer.withDefaults())
 
