@@ -4,6 +4,7 @@
     --text-gray: rgba(255, 255, 255, 0.5);
     --glass-bg: rgba(255, 255, 255, 0.01);
     --glass-border: rgba(255, 255, 255, 0.05);
+    --accent-color: #8d81f8;
 }
 
 body {
@@ -82,6 +83,10 @@ body {
     letter-spacing: -0.03em;
     margin: 0 0 24px 0;
     text-align: center;
+}
+
+.accent-text {
+    color: var(--accent-color);
 }
 
 .chat-window {

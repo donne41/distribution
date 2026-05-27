@@ -45,9 +45,7 @@ public class BFFConfig {
         return http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/chatup/**", "/css/**", "/login/**").permitAll()
-
                         .requestMatchers("/", "/api/messages").authenticated()
-
                         .anyRequest().authenticated())
                 // enable oauth2 login
                 .oauth2Login(Customizer.withDefaults())
@@ -63,7 +61,7 @@ public class BFFConfig {
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
 
                         // Tillåt tillfälligt PUT/POST-anrop till API-endpoints utan X-XSRF-TOKEN header för test i Insomnia
-                        .ignoringRequestMatchers("/api/**")
+//                        .ignoringRequestMatchers("/api/**")
                 )
                 .build();
     }
@@ -211,8 +209,11 @@ public class BFFConfig {
         return RouterFunctions.route()
                 .GET("/", request -> {
 
+                    // Get logged-in user from OAuth2
+                    String username = request.principal().map(principal -> principal.getName())
+                            .orElse("Guest");
                     return ServerResponse.ok()
-                            .render("dashboard");
+                            .render("dashboard", java.util.Map.of("currentUsername", username));
                 })
                 .build();
     }

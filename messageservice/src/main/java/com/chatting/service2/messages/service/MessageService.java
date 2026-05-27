@@ -7,6 +7,9 @@ import com.chatting.service2.messages.dto.CreateMessageDTO;
 import com.chatting.service2.messages.dto.ReceiveMessageDTO;
 import io.grpc.CallCredentials;
 import io.grpc.Status;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,9 +18,12 @@ import com.chatting.grpc.message.UserRequest;
 import com.chatting.grpc.message.UserResponse;
 
 import io.grpc.Metadata;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.Executor;
 
+@Slf4j
 @Service
 public class MessageService {
 
@@ -40,16 +46,27 @@ public class MessageService {
 
 
     @Transactional
-    public ReceiveMessageDTO saveMessage(CreateMessageDTO messageRequest) {
+    public ReceiveMessageDTO saveMessage(CreateMessageDTO messageRequest, Jwt jwt) {
 
         if (messageRequest == null) {
             throw new IllegalArgumentException("Message cannot be empty");
         }
 
+        // Get secure username from JWT
+        String currentUsername = jwt.getSubject() != null ? jwt.getSubject() : jwt.getClaimAsString("sub");
+        log.info("Service received a message! Secure username: " + currentUsername);
+
+        Message message = messageMapper.toEntity(messageRequest);
+
+        message.setUsername(currentUsername);
+        if (message.getCreatedAt() == null) {
+            message.setCreatedAt(LocalDateTime.now());
+        }
+
+        // Get token and create authenticated stub through CallCredentials
         String token = tokenService.getAccessToken();
         UserServiceGrpc.UserServiceBlockingStub authenticatedStub = this.stub.withCallCredentials(new CallCredentials() {
 
-            // Create authenticated stub with token through CallCredentials
             @Override
             public void applyRequestMetadata(RequestInfo requestInfo, Executor appExecutor, MetadataApplier metadataApplier) {
                 appExecutor.execute(() -> {
@@ -65,9 +82,9 @@ public class MessageService {
             }
         });
 
-        // gRPC call
+        // gRPC call to validate user
         UserRequest grpcRequest = UserRequest.newBuilder()
-                .setUsername(messageRequest.username())
+                .setUsername(currentUsername)
                 .build();
 
         UserResponse grpcResponse = authenticatedStub.validateUser(grpcRequest);
@@ -76,9 +93,7 @@ public class MessageService {
             throw new IllegalArgumentException ("User " + messageRequest.username() + " does not exist!");
         }
 
-        Message message = messageMapper.toEntity(messageRequest);
-
-        // Get more detailed info from fields in UserService proto-file
+        // Get details from gRPC-answer and add to message
         long userId = grpcResponse.getId();
         String name = grpcResponse.getName();
 
@@ -92,11 +107,14 @@ public class MessageService {
         return messageMapper.toReceiveDTO(message);
     }
 
-    @Transactional
-    public List<ReceiveMessageDTO> getAllMessages() {
-       return messageRepository.findAllByOrderByCreatedAtAsc()
-               .stream()
-               .map(messageMapper::toReceiveDTO)
-               .toList();
+    @Transactional(readOnly = true)
+    public List<ReceiveMessageDTO> getAllMessages(Jwt jwt) {
+        
+        String currentUsername = jwt.getSubject() != null ? jwt.getSubject() : jwt.getClaimAsString("sub");
+
+        return messageRepository.findAllByUsernameOrderByCreatedAtAsc(currentUsername)
+                .stream()
+                .map(messageMapper::toReceiveDTO)
+                .toList();
     }
 }
