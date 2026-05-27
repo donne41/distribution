@@ -5,9 +5,11 @@ import example.grpc.user.UserResponse;
 import example.grpc.user.UserServiceGrpc;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.grpc.server.service.GrpcService;
 
 // UserService --> Acts as the server-side while MessageService is the client
+@Slf4j
 @GrpcService
 public class GrpcServerService extends UserServiceGrpc.UserServiceImplBase{
 
@@ -49,14 +51,14 @@ public class GrpcServerService extends UserServiceGrpc.UserServiceImplBase{
                         .setExists(false)
                         .build();
             }
-            
+
             // Sends back answer to MessageService
             responseObserver.onNext(response);
             responseObserver.onCompleted();
         } catch (Exception e) {
+            log.error("Failed to validate user: {}", username, e);
             responseObserver.onError(Status.INTERNAL
-                    .withDescription("Failed to validate user: " + e.getMessage())
-                    .withCause(e)
+                    .withDescription("Internal error during user validation")
                     .asRuntimeException());
         }
     }
