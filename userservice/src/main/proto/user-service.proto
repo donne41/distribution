@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option java_package = "example.grpc.user";
+option java_multiple_files = true;
+
+service UserService {
+
+  // Method to validate username, receives question and returns answer
+  rpc ValidateUser (UserRequest) returns (UserResponse);
+
+}
+
+// Question sent
+message UserRequest {
+  string username = 1; // --> 1 = internal field number
+}
+
+// Answer received
+message UserResponse{
+  bool exists = 1;
+  int64 id = 2;
+  string name = 3;
+  string username = 4;
+
+}
