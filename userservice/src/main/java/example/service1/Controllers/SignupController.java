@@ -8,6 +8,8 @@ import example.service1.users.UserDto;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -49,18 +51,5 @@ public class SignupController {
         return "redirect:" + bffAddress;
     }
 
-    @GetMapping("/account")
-    public String getAccountPage(@RequestHeader("currentuser") String username,
-                                 Model model){
-        var user = userService.findUserAndReturnDto(username);
-        model.addAttribute("newUser", user);
-        return "updateuser";
-    }
 
-    @PostMapping("/account")
-    public String updateAccount(@ModelAttribute("newUser") UserDto updateUser){
-        userService.updateUser(updateUser);
-        log.info("USER UPDATED");
-        return "redirect:" + bffAddress;
-    }
 }

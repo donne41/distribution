@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -49,6 +50,21 @@ public class TestController {
         if(userExists){
             return new ResponseEntity<>("",HttpStatus.FOUND);
         }else return new ResponseEntity<>("", HttpStatus.NOT_FOUND);
+    }
+//    @GetMapping("/account")
+//    public ResponseEntity<Void> getAccountPage(Model model,
+//                                 @AuthenticationPrincipal Jwt jwt){
+//        String jwtusername = jwt.getClaimAsString("sub");
+//
+//        System.out.println("Subject: "+ jwtusername);
+//        return ResponseEntity.ok()
+//    }
+
+    @PostMapping("/account")
+    public ResponseEntity<Void> updateAccount(@RequestBody UserDto updateUser,
+                                @AuthenticationPrincipal Jwt jwt){
+        userService.updateUser(updateUser);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
 

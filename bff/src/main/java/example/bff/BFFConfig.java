@@ -194,32 +194,27 @@ public class BFFConfig {
 
     @Bean
     public RouterFunction<ServerResponse> routeToUpdateUser() {
-        return route()
-                .GET("/account", http())
-                .before(request ->
-                        request.principal()
-                                .map(Principal::getName)
-                                .map(username -> ServerRequest.from(request)
-                                        .header("currentuser", username))
-                                .get().build())
-                .before(uri(userServiceAdress))
-                .filter(tokenRelay())
+        return RouterFunctions.route()
+                .GET("/account", request -> {
+                    String user = request.principal().map(principal -> principal.getName()).orElse("Guest");
+                    return ServerResponse.ok().render("updateuser", Map.of("currentuser", user));
+                })
                 .build();
     }
 
-    @Bean
-    public RouterFunction<ServerResponse> routeToSaveUpdate(){
-        return route()
-                .POST("/account", http())
-                .before(request -> {
-                    String token = request.cookies().getFirst("XSRF_TOKEN").getValue();
-                    LOG.debug("CSRF TOKEN: "+ token);
-                    return request;
-                })
-                .filter(tokenRelay())
-                .before(uri(userServiceAdress))
-                .build();
-    }
+//    @Bean
+//    public RouterFunction<ServerResponse> routeToSaveUpdate(){
+//        return route()
+//                .POST("/account", http())
+//                .before(request -> {
+//                    String token = request.cookies().getFirst("XSRF_TOKEN").getValue();
+//                    LOG.debug("CSRF TOKEN: "+ token);
+//                    return request;
+//                })
+//                .filter(tokenRelay())
+//                .before(uri(userServiceAdress))
+//                .build();
+//    }
 
 
 
