@@ -5,6 +5,8 @@ import com.chatting.service2.messages.MessageMapper;
 import com.chatting.service2.messages.MessageRepository;
 import com.chatting.service2.messages.dto.CreateMessageDTO;
 import com.chatting.service2.messages.dto.ReceiveMessageDTO;
+import com.chatting.service2.messages.messagequeue.MessageCreatedEvent;
+import com.chatting.service2.messages.messagequeue.MessageEventPublisher;
 import io.grpc.CallCredentials;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -34,14 +36,18 @@ public class MessageService {
     private final UserServiceGrpc.UserServiceBlockingStub stub;
     private final Oauth2JwtTokenService tokenService;
 
+    private final MessageEventPublisher messageEventPublisher;
+
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public MessageService(MessageRepository messageRepository, MessageMapper messageMapper,
-                          UserServiceGrpc.UserServiceBlockingStub stub, Oauth2JwtTokenService tokenService) {
+                          UserServiceGrpc.UserServiceBlockingStub stub, Oauth2JwtTokenService tokenService,
+                          MessageEventPublisher messageEventPublisher) {
         this.messageRepository = messageRepository;
         this.messageMapper = messageMapper;
         this.stub = stub;
         this.tokenService = tokenService;
+        this.messageEventPublisher = messageEventPublisher;
     }
 
     @Transactional
@@ -108,7 +114,19 @@ public class MessageService {
 
         message = messageRepository.save(message);
 
-        // Todo: Add logic to publish event to Message Queue
+        // Published message event to message queue
+        try {
+            MessageCreatedEvent event = new MessageCreatedEvent(
+                    message.getId(),
+                    message.getUsername(),
+                    message.getContent(),
+                    message.getCreatedAt()
+            );
+
+            messageEventPublisher.publishMessageCreated(event);
+        } catch (Exception e) {
+            log.error("Failed to publish event to RabbitMQ with message-ID: {}",message.getId(),e);
+        }
 
         return messageMapper.toReceiveDTO(message);
     }
