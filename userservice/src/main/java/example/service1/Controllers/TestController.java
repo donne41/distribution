@@ -37,14 +37,10 @@ public class TestController {
         return new UserDto(
                 user.getUsername(),
                 user.getPassword(),
-                user.getAuthAsList());
+                user.getAuthAsList(),
+                null);
     }
 
-    @GetMapping("/get/token")
-    public String getClientName(@AuthenticationPrincipal Jwt jwt) {
-        String token = jwt.getTokenValue().toLowerCase();
-        return "HELLO FROM USER, here is token: " + token;
-    }
 
     @PostMapping("/find/{username}")
     public ResponseEntity<String> findUser(@PathVariable String username){

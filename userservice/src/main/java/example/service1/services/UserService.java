@@ -5,7 +5,9 @@ import example.service1.Exceptions.UsernameAlreadyExists;
 import example.service1.users.CreateUserDto;
 import example.service1.users.UserDto;
 import example.service1.users.UserEntity;
+import org.springframework.boot.webmvc.autoconfigure.WebMvcProperties;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,23 +23,26 @@ public class UserService {
     }
 
 
-
     public UserEntity findUser(String username) {
         return repository.findByUserName(username);
     }
 
-
+    @Transactional
     public void saveUser(CreateUserDto newUser) throws UsernameAlreadyExists {
         if (repository.existsByUserName(newUser.username())) {
             throw new UsernameAlreadyExists("Username is occupied!");
         }
-        System.out.println("Password: " + newUser.password());
         repository.save(mapper.userDtoToEntity(new UserDto(
-                newUser.username(),
-                newUser.password(),
-                List.of("user"))
+                        newUser.username(),
+                        newUser.password(),
+                        List.of("user"),
+                        null)
                 )
         );
+    }
+
+    public UserDto findUserAndReturnDto(String username) {
+        return mapper.userEntityToDto(findUser(username));
     }
 
     public void deleteUser(Long userId) {
@@ -46,9 +51,15 @@ public class UserService {
 
     public void deleteUserByUserName(String userName) {
         if (repository.existsByUserName(userName)) {
-            long Id = repository.findByUserName(userName).getId();
-            deleteUser(Id);
+            deleteUser(repository.findByUserName(userName).getId());
         }
+    }
+
+    public void updateUser(UserDto updateUser){
+        var User = repository.findByUserName(updateUser.username());
+        User.setUserName(updateUser.username());
+        if(!updateUser.password().isBlank()) User.setPassword(updateUser.password());
+        repository.save(User);
     }
 
 

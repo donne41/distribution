@@ -29,14 +29,12 @@ public class UserInitilizer implements CommandLineRunner {
             log.info(" -- RUNNING DATA FILL --");
             userRepository.save(new UserEntity(
                     "demo",
-                    passwordEncoder.encode("demo"),
-                    List.of("user")));
+                    passwordEncoder.encode("demo"))
+                    );
 
-            userRepository.save(new UserEntity("TestUser" ,
-                    "newUser",
-                    passwordEncoder.encode("secret"),
-                    List.of("user")));
-
+            userRepository.save(new UserEntity("newUser",
+                    passwordEncoder.encode("secret"))
+                    );
         } else {
             log.info(" -- NO DATA FILL WAS NECESSARY -- ");
         }

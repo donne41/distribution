@@ -9,5 +9,6 @@ public record UserDto(
         String username,
         @NotBlank
         String password,
-        List<String> roles
+        List<String> roles,
+        Long id
 ){}

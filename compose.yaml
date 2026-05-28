@@ -60,6 +60,7 @@ services:
       - DB_HOST=postgres
       - AUTH_HOST=authservice
       - SPRING.RABBITMQ.HOST=rabbitmq
+      - GRPC_HOST=userservice
 
   authservice:
     build: ./authservice
@@ -71,7 +72,7 @@ services:
     environment:
       - AUTH_PUB_HOST=authservice
       - USER_HOST=userservice
-      - BFF_HOSE=bff
+      - BFF_HOST=bff
     healthcheck:
       test: [ "CMD", "nc", "-z", "authservice", "9000" ]
       interval: 5s
@@ -88,6 +89,7 @@ services:
     environment:
       - AUTH_HOST=authservice
       - USER_HOST=userservice
+      - MESSAGE_HOST=messageservice
 
 volumes:
   postgres_data:

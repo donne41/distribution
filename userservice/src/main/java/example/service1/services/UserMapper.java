@@ -15,7 +15,9 @@ public class UserMapper {
 
     public UserDto userEntityToDto(UserEntity user) {
         return new UserDto(user.getUsername(),
-                "", user.getAuthAsList());
+                "",
+                user.getAuthAsList(),
+                user.getId());
     }
 
     public UserEntity userDtoToEntity(UserDto user) {

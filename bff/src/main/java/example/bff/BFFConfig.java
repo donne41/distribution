@@ -23,9 +23,11 @@ import org.springframework.security.web.server.authentication.RedirectServerAuth
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.RouterFunctions;
+import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.function.ServerResponse;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.security.Provider;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +60,6 @@ public class BFFConfig {
                         .requestMatchers("/", "/api/messages").authenticated()
                         .anyRequest().authenticated())
                 // enable oauth2 login
-                .oauth2Login(Customizer.withDefaults())
                 .oauth2Login(oauth2 -> oauth2
                         .defaultSuccessUrl("/", true))
 
@@ -110,19 +111,24 @@ public class BFFConfig {
 
     // Wildcard Route --> matches all HTTP methods (GET,POST...) in Message Service
     @Bean
-    public RouterFunction<ServerResponse> messageServiceRoute() {
-    public RouterFunction<ServerResponse> routePostCreateNewuser(){
+    public RouterFunction<ServerResponse> routePostCreateNewuser() {
         return route()
-                .route(request -> request.uri().getPath().startsWith("/api/messages"), http())
-                .before(uri("http://" + messageServiceAdress + ":8082"))
-                .before(request -> {
-                    LOG.info("Incoming {} request to Message Service", request.method());
-                    return request;
-                })
                 .POST("/signup", http())
                 .before(uri(userServiceAdress))
                 .filter(tokenRelay())
                 .build();
+    }
+
+    public RouterFunction<ServerResponse> messageServiceRoute(){
+        return route()
+                .route(request -> request.uri().getPath().startsWith("/api/messages"), http())
+                .before(uri(messageServiceAdress))
+                .before(request -> {
+                    LOG.info("Incoming {} request to Message Service", request.method());
+                    return request;
+                })
+                .build();
+
     }
 
     // Flytta till Authservice
@@ -175,16 +181,45 @@ public class BFFConfig {
     public RouterFunction<ServerResponse> routeToDashBoard() {
         return RouterFunctions.route()
                 .GET("/", request -> {
-
+                    LOG.debug("-- GET / REQUEST --");
                     // Get logged-in user from OAuth2
                     String username = request.principal().map(principal -> principal.getName())
                             .orElse("Guest");
+                    LOG.debug("-- USERNAME: {}", username);
                     return ServerResponse.ok()
                             .render("dashboard", java.util.Map.of("currentUsername", username));
                 })
                 .build();
     }
 
+    @Bean
+    public RouterFunction<ServerResponse> routeToUpdateUser() {
+        return route()
+                .GET("/account", http())
+                .before(request ->
+                        request.principal()
+                                .map(Principal::getName)
+                                .map(username -> ServerRequest.from(request)
+                                        .header("currentuser", username))
+                                .get().build())
+                .before(uri(userServiceAdress))
+                .filter(tokenRelay())
+                .build();
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> routeToSaveUpdate(){
+        return route()
+                .POST("/account", http())
+                .before(request -> {
+                    String token = request.cookies().getFirst("XSRF_TOKEN").getValue();
+                    LOG.debug("CSRF TOKEN: "+ token);
+                    return request;
+                })
+                .filter(tokenRelay())
+                .before(uri(userServiceAdress))
+                .build();
+    }
 
 
 

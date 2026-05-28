@@ -1,8 +1,10 @@
 package example.service1.Controllers;
 
 import example.service1.Exceptions.UsernameAlreadyExists;
+import example.service1.services.UserMapper;
 import example.service1.users.CreateUserDto;
 import example.service1.services.UserService;
+import example.service1.users.UserDto;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +14,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+
 @Slf4j
 @Controller
 public class SignupController {
@@ -42,6 +46,21 @@ public class SignupController {
             result.rejectValue("username", "error.newUser", e.getMessage());
             return "signup";
         }
+        return "redirect:" + bffAddress;
+    }
+
+    @GetMapping("/account")
+    public String getAccountPage(@RequestHeader("currentuser") String username,
+                                 Model model){
+        var user = userService.findUserAndReturnDto(username);
+        model.addAttribute("newUser", user);
+        return "updateuser";
+    }
+
+    @PostMapping("/account")
+    public String updateAccount(@ModelAttribute("newUser") UserDto updateUser){
+        userService.updateUser(updateUser);
+        log.info("USER UPDATED");
         return "redirect:" + bffAddress;
     }
 }

@@ -3,6 +3,7 @@ package example.service1.users;
 import example.grpc.user.UserRequest;
 import example.grpc.user.UserResponse;
 import example.grpc.user.UserServiceGrpc;
+import example.service1.services.UserRepository;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +12,7 @@ import org.springframework.grpc.server.service.GrpcService;
 // UserService --> Acts as the server-side while MessageService is the client
 @Slf4j
 @GrpcService
-public class GrpcServerService extends UserServiceGrpc.UserServiceImplBase{
+public class GrpcServerService extends UserServiceGrpc.UserServiceImplBase {
 
     private final UserRepository userRepository;
 
@@ -39,7 +40,7 @@ public class GrpcServerService extends UserServiceGrpc.UserServiceImplBase{
 
             // If user exists, build answer with ID and userinfo
             if (user != null) {
-                if (user.getId() == null || user.getName() == null || user.getUsername() == null) {
+                if (user.getId() == null || user.getUsername() == null) {
                     responseObserver.onError(Status.INTERNAL
                             .withDescription("User data is incomplete")
                             .asRuntimeException());
@@ -50,7 +51,6 @@ public class GrpcServerService extends UserServiceGrpc.UserServiceImplBase{
                 response = UserResponse.newBuilder()
                         .setExists(true)
                         .setId(user.getId())
-                        .setName(user.getName())
                         .setUsername(user.getUsername())
                         .build();
             } else {

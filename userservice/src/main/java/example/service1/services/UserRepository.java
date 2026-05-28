@@ -12,10 +12,10 @@ public interface UserRepository extends ListCrudRepository<UserEntity, Long>{
 
     long count();
 
-    UserEntity findFirstById(int i);
+    UserEntity findFirstById(Long i);
 
-    @NativeQuery("select * from user_db.public.user_entity")
-    List<UserEntity> getAllUsers();
+    List<UserEntity> findAll();
 
     boolean existsByUserName(String userName);
+
 }
