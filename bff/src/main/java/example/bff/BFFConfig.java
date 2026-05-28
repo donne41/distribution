@@ -20,6 +20,7 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
+import org.springframework.util.RouteMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.RouterFunctions;
@@ -191,7 +192,6 @@ public class BFFConfig {
                 })
                 .build();
     }
-
     @Bean
     public RouterFunction<ServerResponse> routeToUpdateUser() {
         return RouterFunctions.route()
@@ -199,6 +199,15 @@ public class BFFConfig {
                     String user = request.principal().map(principal -> principal.getName()).orElse("Guest");
                     return ServerResponse.ok().render("updateuser", Map.of("currentuser", user));
                 })
+                .build();
+    }
+    //TODO Fix Unsupported media type when sending json
+    @Bean
+    public RouterFunction<ServerResponse> routePostUpdate(){
+        return RouterFunctions.route()
+                .POST("/account", http())
+                .before(uri(userServiceAdress))
+                .filter(tokenRelay())
                 .build();
     }
 
