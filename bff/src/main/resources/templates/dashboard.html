@@ -1,18 +1,157 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Dashboard</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>MicroChat</title>
+    <meta th:name="_csrf" th:content="${_csrf.token}"/>
+    <meta th:name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+    <link rel="stylesheet" href="../static/css/style.css" th:href="@{/css/style.css}">
 </head>
 <body>
-<h1>Welcome to dashboard!</h1>
 
-<form th:action="@{/logout}" method="post">
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+<h1 class="hero-text">
+    <span class="accent-text">Micro</span>service <br>Distributed <span class="accent-text">Chat</span>
+</h1>
 
-    <button type="submit">Sign Out</button>
-</form>
+<div class="nav-container">
+    <a href="/account" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        My Account
+    </a>
 
+    <form th:action="@{/logout}" method="post" class="logout-form">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit">Sign Out</button>
+    </form>
+</div>
+
+<div class="app-container">
+
+    <main class="chat-window">
+
+        <div id="messages">
+            <!-- Messages-->
+        </div>
+
+        <div class="input-wrapper">
+
+            <input type="text" id="message-input" aria-label="Chat message"
+                   placeholder="Enter your message...">
+            <button type="button" class="send-btn" aria-label="Send message"
+                    onclick="sendMessage()">↑</button>
+        </div>
+    </main>
+</div>
+
+<script th:inline="javascript">
+
+    // Thymeleaf injects logged-in user, 'demo' acts as a fallback
+    const loggedInUser = /*[[${currentUsername}]]*/ 'demo';
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+        loadMessages();
+
+    });
+
+    async function loadMessages() {
+        try {
+            const response = await fetch('/api/messages');
+            if (response.ok) {
+                const messages = await response.json();
+
+              document.getElementById('messages').innerHTML = '';
+
+              messages.forEach(msg => {
+                  // Handle message placement
+                  const senderClass = (msg.username === loggedInUser) ? 'user' : 'bot';
+                  appendMessage(msg.content, senderClass, msg.username, msg.createdAt);
+              });
+            }
+        } catch (error) {
+            console.error("Failed to load messages:", error);
+        }
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('message-input');
+        const messageText = input.value.trim();
+
+        if (!messageText) return;
+
+        // show message in UI directly to user
+        appendMessage(messageText, 'user', loggedInUser);
+        input.value = ''; // clears input field
+
+        // Get CSRF-TOKEN from meta tags
+        const tokenMeta = document.querySelector("meta[name='_csrf']");
+        const headerMeta = document.querySelector("meta[name='_csrf_header']");
+
+        const token = tokenMeta ? tokenMeta.getAttribute("content") : null;
+        const header = headerMeta ? headerMeta.getAttribute("content") : null;
+
+        const requestHeaders = {
+            'Content-Type': 'application/json'
+        };
+
+        if (token && header) {
+            requestHeaders[header] = token;
+        }
+
+        // Sends message to Message Service trough BFF-gateway
+        try {
+            const response = await fetch('/api/messages', {
+                method: 'POST',
+                headers: requestHeaders,
+                body: JSON.stringify({
+                    username: loggedInUser,
+                    content: messageText,
+                    createdAt: new Date().toISOString()  // to translate LocalDateTime
+                })
+            });
+
+            if (!response.ok) {
+                console.error("Server responded with an error:", response.status);
+            }
+        } catch (error) {
+            console.error("Failed to send message to BFF:", error);
+        }
+    }
+
+    function appendMessage(text, senderClass, username, timestamp) {
+        const messagesContainer = document.getElementById('messages');
+
+        // MessageContainer
+        const messageBlock = document.createElement('div');
+        messageBlock.classList.add('message-block', senderClass);
+
+        // Metainfo (Username + timestamp)
+        const metaDiv = document.createElement('div');
+        metaDiv.classList.add('message-meta');
+
+        // If a timestamp is missing (for new messages), create new one
+        const time = timestamp ? new Date(timestamp) : new Date();
+        const formattedDate = time.toLocaleDateString([], {day: 'numeric', month: 'short'});
+        const formattedTime = time.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+
+        metaDiv.innerText = `${username} • ${formattedDate} ${formattedTime}`;
+
+        const msgDiv = document.createElement('div');
+        msgDiv.classList.add('message', senderClass);
+        msgDiv.innerText = text;
+
+        messageBlock.appendChild(metaDiv);
+        messageBlock.appendChild(msgDiv);
+        messagesContainer.appendChild(messageBlock);
+
+        messagesContainer.scrollTo({
+            top: messagesContainer.scrollHeight,
+            behavior: 'smooth'
+        });
+
+    }
+
+</script>
 
 </body>
 </html>

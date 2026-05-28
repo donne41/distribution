@@ -15,7 +15,7 @@ import java.util.List;
 @Order(1)
 public class UserInitilizer implements CommandLineRunner {
     private final UserRepository userRepository;
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
     Logger log = LoggerFactory.getLogger(UserInitilizer.class);
 
     public UserInitilizer(UserRepository repo, PasswordEncoder encoder) {
@@ -31,11 +31,13 @@ public class UserInitilizer implements CommandLineRunner {
                     "demo",
                     passwordEncoder.encode("demo"),
                     List.of("user")));
-            userRepository.save(new UserEntity(
-                    "auth-service-client",
-                    passwordEncoder.encode("secretPassword"),
-                    List.of("system")));
-        }else {
+
+            userRepository.save(new UserEntity("TestUser" ,
+                    "newUser",
+                    passwordEncoder.encode("secret"),
+                    List.of("user")));
+
+        } else {
             log.info(" -- NO DATA FILL WAS NECESSARY -- ");
         }
     }

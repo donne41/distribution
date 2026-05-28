@@ -47,15 +47,17 @@ public class BFFConfig {
     @Value("${local.userservice}")
     private String userServiceAdress;
 
+    @Value("${local.messageservice:localhost}")
+    private String messageServiceAdress;
+
     @Bean
     SecurityFilterChain security(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) {
         return http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/chatup/**", "/css/**", "/login/**", "/signup").permitAll()
-                        .requestMatchers("/", "/api/test2").authenticated()
+                        .requestMatchers("/chatup/**", "/css/**", "/login/**").permitAll()
+                        .requestMatchers("/", "/api/messages").authenticated()
                         .anyRequest().authenticated())
                 // enable oauth2 login
-
                 .oauth2Login(Customizer.withDefaults())
                 .oauth2Login(oauth2 -> oauth2
                         .defaultSuccessUrl("/", true))
@@ -70,6 +72,9 @@ public class BFFConfig {
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+
+                        // Tillåt tillfälligt PUT/POST-anrop till API-endpoints utan X-XSRF-TOKEN header för test i Insomnia
+//                        .ignoringRequestMatchers("/api/**")
                 )
                 .build();
     }
@@ -93,17 +98,6 @@ public class BFFConfig {
         };
     }
 
-
-    @Bean
-    public RouterFunction<ServerResponse> routeToDashBoard() {
-        return RouterFunctions.route()
-                .GET("/", request -> {
-                    return ServerResponse.ok()
-                            .render("dashboard");
-                })
-                .build();
-    }
-
     @Bean
     public RouterFunction<ServerResponse> routeToSignupPage(){
         return route()
@@ -112,9 +106,19 @@ public class BFFConfig {
                 .build();
     }
 
+
+
+    // Wildcard Route --> matches all HTTP methods (GET,POST...) in Message Service
     @Bean
+    public RouterFunction<ServerResponse> messageServiceRoute() {
     public RouterFunction<ServerResponse> routePostCreateNewuser(){
         return route()
+                .route(request -> request.uri().getPath().startsWith("/api/messages"), http())
+                .before(uri("http://" + messageServiceAdress + ":8082"))
+                .before(request -> {
+                    LOG.info("Incoming {} request to Message Service", request.method());
+                    return request;
+                })
                 .POST("/signup", http())
                 .before(uri(userServiceAdress))
                 .filter(tokenRelay())
@@ -129,6 +133,8 @@ public class BFFConfig {
         return oidcLogoutSuccessHandler;
 
     }
+
+
 
     @Bean
     public RouterFunction<ServerResponse> routeForGettingToken(){
@@ -166,11 +172,16 @@ public class BFFConfig {
     }
 
     @Bean
-    public RouterFunction<ServerResponse> routeToFindUser(){
-        return route()
-                .POST("/find/**", http())
-                .before(uri(userServiceAdress))
-                .filter(tokenRelay())
+    public RouterFunction<ServerResponse> routeToDashBoard() {
+        return RouterFunctions.route()
+                .GET("/", request -> {
+
+                    // Get logged-in user from OAuth2
+                    String username = request.principal().map(principal -> principal.getName())
+                            .orElse("Guest");
+                    return ServerResponse.ok()
+                            .render("dashboard", java.util.Map.of("currentUsername", username));
+                })
                 .build();
     }
 
