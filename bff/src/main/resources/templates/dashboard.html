@@ -148,8 +148,14 @@
             top: messagesContainer.scrollHeight,
             behavior: 'smooth'
         });
-
     }
+
+    document.getElementById('message-input').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter'){
+            e.preventDefault();
+            sendMessage();
+        }
+    });
 
 </script>
 

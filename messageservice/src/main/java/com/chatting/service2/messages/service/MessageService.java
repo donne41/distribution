@@ -80,11 +80,11 @@ public class MessageService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReceiveMessageDTO> getAllMessages(Jwt jwt) {
+    public List<ReceiveMessageDTO> getAllMessages() {
         
-        String currentUsername = jwt.getSubject() != null ? jwt.getSubject() : jwt.getClaimAsString("sub");
+//        String currentUsername = jwt.getSubject() != null ? jwt.getSubject() : jwt.getClaimAsString("sub");
 
-        return messageRepository.findAllByUsernameOrderByCreatedAtAsc(currentUsername)
+        return messageRepository.findAll()
                 .stream()
                 .map(messageMapper::toReceiveDTO)
                 .toList();
