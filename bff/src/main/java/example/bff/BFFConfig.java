@@ -57,7 +57,7 @@ public class BFFConfig {
     SecurityFilterChain security(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) {
         return http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/chatup/**", "/css/**", "/login/**").permitAll()
+                        .requestMatchers("/chatup/**", "/css/**", "/login/**", "/signup").permitAll()
                         .requestMatchers("/", "/api/messages").authenticated()
                         .anyRequest().authenticated())
                 // enable oauth2 login
@@ -76,7 +76,7 @@ public class BFFConfig {
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
 
                         // Tillåt tillfälligt PUT/POST-anrop till API-endpoints utan X-XSRF-TOKEN header för test i Insomnia
-//                        .ignoringRequestMatchers("/api/**")
+                        //.ignoringRequestMatchers("/api/**")
                 )
                 .build();
     }
@@ -201,11 +201,19 @@ public class BFFConfig {
                 })
                 .build();
     }
-    //TODO Fix Unsupported media type when sending json
     @Bean
     public RouterFunction<ServerResponse> routePostUpdate(){
         return RouterFunctions.route()
                 .POST("/account", http())
+                .before(uri(userServiceAdress))
+                .filter(tokenRelay())
+                .build();
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> routeDeleteuser(){
+        return route()
+                .DELETE("/delete", http())
                 .before(uri(userServiceAdress))
                 .filter(tokenRelay())
                 .build();

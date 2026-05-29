@@ -1,19 +1,15 @@
 package example.service1.Controllers;
 
-import example.service1.users.CreateUserDto;
 import example.service1.users.UserDto;
 import example.service1.users.UserEntity;
 import example.service1.services.UserService;
+import example.service1.users.UpdateUserDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.URI;
-import java.util.List;
 
 @RestController
 public class TestController {
@@ -61,9 +57,15 @@ public class TestController {
 //    }
 
     @PostMapping("/account")
-    public ResponseEntity<Void> updateAccount(@RequestBody UserDto updateUser,
+    public ResponseEntity<Void> updateAccount(@RequestBody UpdateUserDto updateUser,
                                 @AuthenticationPrincipal Jwt jwt){
-        userService.updateUser(updateUser);
+        userService.updateUser(updateUser, jwt);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void> deleteAccount(@AuthenticationPrincipal Jwt jwt){
+        userService.deleteUser(jwt);
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 

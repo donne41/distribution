@@ -5,7 +5,8 @@ import example.service1.Exceptions.UsernameAlreadyExists;
 import example.service1.users.CreateUserDto;
 import example.service1.users.UserDto;
 import example.service1.users.UserEntity;
-import org.springframework.boot.webmvc.autoconfigure.WebMvcProperties;
+import example.service1.users.UpdateUserDto;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,10 +56,14 @@ public class UserService {
         }
     }
 
-    public void updateUser(UserDto updateUser){
-        var User = repository.findByUserName(updateUser.username());
+    public void deleteUser(Jwt jwt){
+        repository.delete(findUser(jwt.getSubject()));
+    }
+
+    public void updateUser(UpdateUserDto updateUser, Jwt jwt){
+        var User = repository.findByUserName(jwt.getSubject());
         User.setUserName(updateUser.username());
-        if(!updateUser.password().isBlank()) User.setPassword(updateUser.password());
+        if(updateUser.password() != null) User.setPassword(mapper.encodePassword(updateUser.password()));
         repository.save(User);
     }
 
@@ -66,4 +71,5 @@ public class UserService {
     public Boolean userExits(String username) {
         return repository.existsByUserName(username);
     }
+
 }

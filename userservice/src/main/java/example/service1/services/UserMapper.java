@@ -25,4 +25,8 @@ public class UserMapper {
                 encoder.encode(user.password()),
                 user.roles());
     }
+
+    public String encodePassword(String rawPassword){
+        return encoder.encode(rawPassword);
+    }
 }
