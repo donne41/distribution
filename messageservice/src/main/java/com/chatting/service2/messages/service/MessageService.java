@@ -55,16 +55,29 @@ public class MessageService {
             throw new IllegalArgumentException("Message cannot be empty");
         }
 
-        // Get secure username from JWT
-        String currentUsername = jwt.getSubject() != null ? jwt.getSubject() : jwt.getClaimAsString("sub");
-        log.debug("Service received a message for user {}", currentUsername);
+        String currentUsername;
+        Long userId = null;
+        String name = "AI-Bot";
 
-        UserResponse grpcResponse = validateUserWithGrpc(currentUsername);
+        if (jwt == null) {
+            log.info("REST-call from AI-BOT without JTW received.");
+            currentUsername = "ai-bot";
+            userId = 999L;
+
+        } else {
+            // For normal users, get secure username from JWT
+            currentUsername = jwt.getSubject() != null ? jwt.getSubject() : jwt.getClaimAsString("sub");
+            log.debug("Service received a message for user {}", currentUsername);
+
+            UserResponse grpcResponse = validateUserWithGrpc(currentUsername);
+            userId =  grpcResponse.getId();
+            name = grpcResponse.getName();
+        }
 
         Message message = messageMapper.toEntity(messageRequest);
         message.setUsername(currentUsername);
-        message.setUserId(grpcResponse.getId());
-        message.setName(grpcResponse.getName());
+        message.setUserId(userId);
+        message.setName(name);
 
         if (message.getCreatedAt() == null) {
             message.setCreatedAt(LocalDateTime.now());
@@ -81,10 +94,8 @@ public class MessageService {
 
     @Transactional(readOnly = true)
     public List<ReceiveMessageDTO> getAllMessages() {
-        
-//        String currentUsername = jwt.getSubject() != null ? jwt.getSubject() : jwt.getClaimAsString("sub");
 
-        return messageRepository.findAll()
+        return messageRepository.findAllByOrderByCreatedAtAsc()
                 .stream()
                 .map(messageMapper::toReceiveDTO)
                 .toList();
@@ -145,5 +156,4 @@ public class MessageService {
             log.error("Failed to publish event to RabbitMQ with message-ID: {}",message.getId(),e);
         }
     }
-
 }

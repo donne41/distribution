@@ -52,6 +52,7 @@
     document.addEventListener("DOMContentLoaded", () => {
         loadMessages();
 
+
     });
 
     async function loadMessages() {
@@ -59,14 +60,30 @@
             const response = await fetch('/api/messages');
             if (response.ok) {
                 const messages = await response.json();
+                const messageContainer = document.getElementById('messages');
 
-              document.getElementById('messages').innerHTML = '';
+                const currenRenderCount = messageContainer.querySelectorAll('.message-block:not(.thinking)').length;
 
-              messages.forEach(msg => {
-                  // Handle message placement
-                  const senderClass = (msg.username === loggedInUser) ? 'user' : 'bot';
-                  appendMessage(msg.content, senderClass, msg.username, msg.createdAt);
-              });
+                if (messages.length > currenRenderCount) {
+
+                    if (currenRenderCount === 0) {
+                        messageContainer.innerHTML = '';
+                    }
+
+                    const newMessages = messages.slice(currenRenderCount);
+
+                    newMessages.forEach(msg => {
+                        let senderClass = 'other-user';
+
+                        if (msg.username === loggedInUser) {
+                            senderClass = 'user';
+                        } else if (msg.username === 'ai-bot') {
+                            senderClass = 'bot';
+                        }
+
+                        appendMessage(msg.content, senderClass, msg.username, msg.createdAt);
+                    });
+                }
             }
         } catch (error) {
             console.error("Failed to load messages:", error);
@@ -79,6 +96,17 @@
 
         if (!messageText) return;
 
+        let initialCount = 0;
+        try {
+            const initialResponse = await fetch('/api/messages');
+            if (initialResponse.ok){
+                const initialMessages = await initialResponse.json();
+                initialCount = initialMessages.length;
+            }
+        } catch (err) {
+            console.error("Failed to fetch initial message count:", err);
+        }
+
         // show message in UI directly to user
         appendMessage(messageText, 'user', loggedInUser);
         input.value = ''; // clears input field
@@ -86,20 +114,16 @@
         // Get CSRF-TOKEN from meta tags
         const tokenMeta = document.querySelector("meta[name='_csrf']");
         const headerMeta = document.querySelector("meta[name='_csrf_header']");
-
         const token = tokenMeta ? tokenMeta.getAttribute("content") : null;
         const header = headerMeta ? headerMeta.getAttribute("content") : null;
 
-        const requestHeaders = {
-            'Content-Type': 'application/json'
-        };
-
+        const requestHeaders = {'Content-Type': 'application/json'};
         if (token && header) {
             requestHeaders[header] = token;
         }
 
-        // Sends message to Message Service trough BFF-gateway
         try {
+            // Sends message to Message Service trough BFF-gateway
             const response = await fetch('/api/messages', {
                 method: 'POST',
                 headers: requestHeaders,
@@ -113,6 +137,41 @@
             if (!response.ok) {
                 console.error("Server responded with an error:", response.status);
             }
+
+            if (messageText.includes('@bot')) {
+                // Load indication for UI-view
+                appendMessage("The Bot is thinking...", 'bot thinking', 'ai-bot');
+
+                const messagesContainer = document.getElementById('messages');
+                const thinkingBubble = messagesContainer.lastChild;
+
+
+                let checkInterval = setInterval(async () =>{
+                    try {
+                        const checkResponse = await fetch('/api/messages');
+                        if (checkResponse.ok) {
+                            const currentMessages = await checkResponse.json();
+
+                            if (currentMessages.length > initialCount + 1) {
+                                clearInterval(checkInterval);
+
+                                if (thinkingBubble && thinkingBubble.parentNode === messagesContainer) {
+                                    messagesContainer.removeChild(thinkingBubble);
+                                }
+
+                                await loadMessages();
+                            }
+
+                        }
+                    } catch (err) {
+                        console.error("Error during check for bot-answer:",err);
+                    }
+
+                }, 1500);
+
+                setTimeout(() => clearInterval(checkInterval), 20000);
+            }
+
         } catch (error) {
             console.error("Failed to send message to BFF:", error);
         }
@@ -123,7 +182,8 @@
 
         // MessageContainer
         const messageBlock = document.createElement('div');
-        messageBlock.classList.add('message-block', senderClass);
+        // Adds message bubble/block and specific role/sender
+        messageBlock.classList.add('message-block', ...senderClass.split(' '));
 
         // Metainfo (Username + timestamp)
         const metaDiv = document.createElement('div');
@@ -137,7 +197,7 @@
         metaDiv.innerText = `${username} • ${formattedDate} ${formattedTime}`;
 
         const msgDiv = document.createElement('div');
-        msgDiv.classList.add('message', senderClass);
+        msgDiv.classList.add('message', ...senderClass.split(' '));
         msgDiv.innerText = text;
 
         messageBlock.appendChild(metaDiv);

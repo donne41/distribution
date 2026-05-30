@@ -168,8 +168,15 @@ body {
 }
 
 .message.bot {
-    background-color: #333;
+    background-color: rgba(141, 129, 248, 0.15);
+    color: #e5e2ff;
     align-self: flex-start;
+    border-bottom-left-radius: 4px;
+}
+
+.message.other-user {
+    background-color: #22252a;
+    color: white;
     border-bottom-left-radius: 4px;
 }
 
