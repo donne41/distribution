@@ -16,16 +16,19 @@ import java.util.List;
 @Component
 public class BotMessageConsumer {
 
-    private final RestClient restClient;
-    private final String modelName;
+private final RestClient aiRestClient;
+private final RestClient messageRestClient;
+private final String modelName;
 
 
-    public BotMessageConsumer(RestClient restClient,
-                              @Value("${ai.api.model-name}") String modelName) {
-        this.restClient = restClient;
+    public BotMessageConsumer(RestClient aiRestClient,
+                              RestClient messageRestClient,
+                              @Value("${ai.api.model-name}")String modelName) {
+        this.aiRestClient = aiRestClient;
+        this.messageRestClient = messageRestClient;
         this.modelName = modelName;
-
     }
+
 
     @RabbitListener(queues = "message-published")
     public void consumeMessage(MessageCreatedEvent event) {
@@ -38,7 +41,7 @@ public class BotMessageConsumer {
 
         // Trigger --> Answer message if content contains @bot
         if (event.content() != null && event.content().contains("@bot")) {
-            String cleanPrompt = event.content().replace("@bot", "");
+            String cleanPrompt = event.content().replaceFirst("@bot", "").trim();
             log.info("Generating answer to prompt: {}", cleanPrompt);
 
             String botAnswer = generateBotReply(cleanPrompt);
@@ -59,15 +62,19 @@ public class BotMessageConsumer {
 
         try {
             // Sends Post-call to chat/completions
-            ChatCompletionResponse response = restClient.post()
+            ChatCompletionResponse response = aiRestClient.post()
                     .uri("/chat/completions")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(requestPayload)
                     .retrieve()
                     .body(ChatCompletionResponse.class);
 
-            if (response != null && !response.choices().isEmpty()) {
-                return response.choices().getFirst().message().content();
+            if (response != null && response.choices() != null && !response.choices().isEmpty()) {
+                var choice = response.choices().getFirst();
+
+                if (choice.message() != null && choice.message().content() != null) {
+                    return choice.message().content();
+                }
             }
         } catch (Exception e) {
             log.error("Failed to communicate with AI API", e);
@@ -80,8 +87,8 @@ public class BotMessageConsumer {
         var payload = new MessageCreatedEvent(null, "ai-bot", botAnswer, null);
 
         try {
-            RestClient.create().post()
-                    .uri("http://localhost:8082/api/messages")
+            messageRestClient.post()
+                    .uri("/api/messages")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(payload)
                     .retrieve()

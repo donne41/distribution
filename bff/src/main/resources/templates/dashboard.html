@@ -169,8 +169,14 @@
 
                 }, 1500);
 
-                setTimeout(() => clearInterval(checkInterval), 20000);
-            }
+                setTimeout(() => {
+                    clearInterval(checkInterval);
+                    if (thinkingBubble && thinkingBubble.parentNode === messagesContainer) {
+                        messagesContainer.removeChild(thinkingBubble);
+                    }
+            }, 20000);
+
+                }
 
         } catch (error) {
             console.error("Failed to send message to BFF:", error);

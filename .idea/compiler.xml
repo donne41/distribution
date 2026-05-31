@@ -9,22 +9,12 @@
         <outputRelativeToContentRoot value="true" />
         <module name="authservice" />
         <module name="bff" />
-        <module name="botservice" />
       </profile>
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.46/a5cfe99fdf320e84955ef653f2ce1bf789d11385/lombok-1.18.46.jar" />
         </processorPath>
-      </profile>
-      <profile name="Annotation profile for messageservice" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
-        </processorPath>
-        <module name="messageservice" />
       </profile>
       <profile name="Annotation profile for userservice" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -36,6 +26,16 @@
         </processorPath>
         <module name="userservice" />
       </profile>
+      <profile name="Annotation profile for messageservice" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
+        </processorPath>
+        <module name="messageservice" />
+        <module name="botservice" />
+      </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="authservice (2)" target="1.5" />
@@ -44,6 +44,7 @@
       <module name="authservice (5)" target="25" />
       <module name="authservice (6)" target="25" />
       <module name="bff (2)" target="25" />
+      <module name="botservice (1)" target="25" />
       <module name="chatUp" target="21" />
       <module name="chatUp.main" target="21" />
       <module name="chatUp.test" target="21" />
@@ -82,6 +83,7 @@
       <module name="authservice" options="-parameters" />
       <module name="bff" options="-parameters" />
       <module name="botservice" options="-parameters" />
+      <module name="botservice (1)" options="-parameters" />
       <module name="chatUp" options="-parameters" />
       <module name="chatUp.main" options="-parameters" />
       <module name="chatUp.test" options="-parameters" />
