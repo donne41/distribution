@@ -11,8 +11,8 @@
     <groupId>com.chatting</groupId>
     <artifactId>botservice</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>service3</name>
-    <description>service3</description>
+    <name>botservice</name>
+    <description>botservice</description>
     <url/>
     <licenses>
         <license/>
