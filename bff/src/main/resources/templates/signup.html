@@ -106,7 +106,20 @@
                 window.location.href= "/"
             }else {
                 const errorData = await response.json();
-                alert("account not created! Reason: " + errorData.error);
+                let errormessage ="";
+                for (const key in errorData) {
+                    if (errorData.hasOwnProperty(key)) {
+                        const value = errorData[key];
+
+                        if (typeof value === 'object' && value !== null) {
+                            errormessage += `${key}: ${JSON.stringify(value)}\n`;
+                        } else {
+                            errormessage += `${key}: ${value}\n`;
+                        }
+                    }
+                }
+
+                alert("account not created!\n" + errormessage);
             }
         }catch(error) {
             console.error("Error creating user!"+ error);

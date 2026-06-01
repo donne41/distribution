@@ -122,11 +122,10 @@
 
             } else {
                 const errorData = await response.json();
-                const fieldErrors = errorData.error;
                 let errormessage ="";
-                for (const key in fieldErrors) {
-                    if (fieldErrors.hasOwnProperty(key)) {
-                        const value = fieldErrors[key];
+                for (const key in errorData) {
+                    if (errorData.hasOwnProperty(key)) {
+                        const value = errorData[key];
 
                         if (typeof value === 'object' && value !== null) {
                             errormessage += `${key}: ${JSON.stringify(value)}\n`;
@@ -135,8 +134,6 @@
                         }
                     }
                 }
-
-                    errormessage = JSON.stringify(errorData);
 
                 alert("Error saving account! Reason: "+ errormessage);
             }

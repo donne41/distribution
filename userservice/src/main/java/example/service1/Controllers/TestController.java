@@ -94,10 +94,10 @@ public class TestController {
                                               BindingResult result){
         if(result.hasErrors()){
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
-                    .body(Map.of("error", result.getFieldErrors().stream()
+                    .body(result.getFieldErrors().stream()
                             .collect(Collectors.toMap(
                                     FieldError::getField,
-                                    error -> error.getDefaultMessage()))));
+                                    error -> error.getDefaultMessage())));
         }
         try {
             userService.saveUser(newUser);
