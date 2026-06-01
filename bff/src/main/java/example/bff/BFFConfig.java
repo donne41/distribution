@@ -182,11 +182,9 @@ public class BFFConfig {
     public RouterFunction<ServerResponse> routeToDashBoard() {
         return RouterFunctions.route()
                 .GET("/", request -> {
-                    LOG.debug("-- GET / REQUEST --");
                     // Get logged-in user from OAuth2
                     String username = request.principal().map(principal -> principal.getName())
                             .orElse("Guest");
-                    LOG.debug("-- USERNAME: {}", username);
                     return ServerResponse.ok()
                             .render("dashboard", java.util.Map.of("currentUsername", username));
                 })
