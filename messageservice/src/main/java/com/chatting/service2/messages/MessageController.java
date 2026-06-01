@@ -22,12 +22,6 @@ public class MessageController {
         this.messageService = messageService;
     }
 
-
-//    @GetMapping("/test")
-//    public String test() {
-//        return "hello from Message Service! ";
-//    }
-
     @PostMapping()
     public ResponseEntity<ReceiveMessageDTO> createMessage(@Valid @RequestBody CreateMessageDTO messageRequest,
                                                            @AuthenticationPrincipal Jwt jwt){
@@ -42,7 +36,4 @@ public class MessageController {
         List<ReceiveMessageDTO> receiveMessage = messageService.getAllMessages(jwt);
         return ResponseEntity.ok(receiveMessage);
     }
-
-
-
 }

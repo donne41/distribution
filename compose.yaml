@@ -24,7 +24,7 @@ services:
       - "RABBITMQ_DEFAULT_USER=guest"
       - "RABBITMQ_DEFAULT_PASS=guest"
     healthcheck:
-      test: [ "CMD", "nc", "-z", "rabbitmq", "5672" ]
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -33,11 +33,12 @@ services:
     build: ./userservice
     ports:
       - "8081:8081"
+      - "9090:9090"
     depends_on:
       postgres:
         condition: service_healthy
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
       authservice:
         condition: service_started
     environment:
@@ -55,10 +56,13 @@ services:
       authservice:
         condition: service_started
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
     environment:
       - DB_HOST=postgres
       - AUTH_HOST=authservice
+      - RABBITMQ_HOST=rabbitmq
+      - USER_SERVICE_GRPC_HOST=userservice
+      - USER_SERVICE_GRPC_PORT=9090
       - SPRING.RABBITMQ.HOST=rabbitmq
       - GRPC_HOST=userservice
 
