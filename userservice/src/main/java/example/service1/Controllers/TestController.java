@@ -1,5 +1,8 @@
 package example.service1.Controllers;
 
+import com.google.api.Http;
+import example.service1.Exceptions.UsernameAlreadyExists;
+import example.service1.users.CreateUserDto;
 import example.service1.users.UserDto;
 import example.service1.users.UserEntity;
 import example.service1.services.UserService;
@@ -10,6 +13,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 public class TestController {
@@ -57,15 +62,31 @@ public class TestController {
 //    }
 
     @PostMapping("/account")
-    public ResponseEntity<Void> updateAccount(@RequestBody UpdateUserDto updateUser,
+    public ResponseEntity<?> updateAccount(@RequestBody UpdateUserDto updateUser,
                                 @AuthenticationPrincipal Jwt jwt){
-        userService.updateUser(updateUser, jwt);
+        try {
+            userService.updateUser(updateUser, jwt);
+        }catch (UsernameAlreadyExists e){
+            ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
+                    .body(Map.of("error", e.getMessage()));
+        }
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<Void> deleteAccount(@AuthenticationPrincipal Jwt jwt){
         userService.deleteUser(jwt);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+    @PostMapping("/signup")
+    public ResponseEntity<?> createNewAccount(@RequestBody CreateUserDto newUser){
+        try {
+            userService.saveUser(newUser);
+        }catch (UsernameAlreadyExists e){
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
+                    .body(Map.of("error", e.getMessage()));
+        }
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 

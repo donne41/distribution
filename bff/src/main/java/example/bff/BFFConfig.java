@@ -72,8 +72,8 @@ public class BFFConfig {
                 )
 //                 save csrf token for post request from diffrent modules
                 .csrf(csrf -> csrf
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+                                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                                .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
 
                         // Tillåt tillfälligt PUT/POST-anrop till API-endpoints utan X-XSRF-TOKEN header för test i Insomnia
                         //.ignoringRequestMatchers("/api/**")
@@ -84,30 +84,31 @@ public class BFFConfig {
 
     //csrf token redering before proxy to service
     @Bean
-    public OncePerRequestFilter csrfCookieFilter(){
-        return new OncePerRequestFilter(){
+    public OncePerRequestFilter csrfCookieFilter() {
+        return new OncePerRequestFilter() {
             @Override
             protected void doFilterInternal(HttpServletRequest request,
                                             HttpServletResponse response,
                                             FilterChain filterChain)
                     throws ServletException, IOException {
                 CsrfToken token = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
-                if(token != null){
+                if (token != null) {
                     token.getToken();
                 }
-                filterChain.doFilter(request,response);
+                filterChain.doFilter(request, response);
             }
         };
     }
 
     @Bean
-    public RouterFunction<ServerResponse> routeToSignupPage(){
+    public RouterFunction<ServerResponse> routeToSignupPage() {
         return route()
-                .GET("/signup", http())
-                .before(uri(userServiceAdress))
+                .GET("/signup", request -> {
+                    return ServerResponse.ok()
+                            .render("signup", Map.of("nothing", ""));
+                })
                 .build();
     }
-
 
 
     // Wildcard Route --> matches all HTTP methods (GET,POST...) in Message Service
@@ -120,7 +121,7 @@ public class BFFConfig {
                 .build();
     }
 
-    public RouterFunction<ServerResponse> messageServiceRoute(){
+    public RouterFunction<ServerResponse> messageServiceRoute() {
         return route()
                 .route(request -> request.uri().getPath().startsWith("/api/messages"), http())
                 .before(uri(messageServiceAdress))
@@ -142,17 +143,17 @@ public class BFFConfig {
     }
 
 
-
     @Bean
-    public RouterFunction<ServerResponse> routeForGettingToken(){
+    public RouterFunction<ServerResponse> routeForGettingToken() {
         return route()
                 .GET("/get/token", http())
                 .before(uri(userServiceAdress))
                 .filter(tokenRelay())
                 .build();
     }
+
     @Bean
-    public RouterFunction<ServerResponse> routeGetAllUsers(){
+    public RouterFunction<ServerResponse> routeGetAllUsers() {
         return route()
                 .GET("/get/users", http())
                 .before(uri(userServiceAdress))
@@ -161,7 +162,7 @@ public class BFFConfig {
     }
 
     @Bean
-    public RouterFunction<ServerResponse> routePostNewuser(){
+    public RouterFunction<ServerResponse> routePostNewuser() {
         return route()
                 .POST("/get/users", http())
                 .before(uri(userServiceAdress))
@@ -170,7 +171,7 @@ public class BFFConfig {
     }
 
     @Bean
-    public RouterFunction<ServerResponse> routeGetUserDetail(){
+    public RouterFunction<ServerResponse> routeGetUserDetail() {
         return route()
                 .GET("/api/users", http())
                 .before(uri(userServiceAdress))
@@ -190,6 +191,7 @@ public class BFFConfig {
                 })
                 .build();
     }
+
     @Bean
     public RouterFunction<ServerResponse> routeToUpdateUser() {
         return RouterFunctions.route()
@@ -199,8 +201,9 @@ public class BFFConfig {
                 })
                 .build();
     }
+
     @Bean
-    public RouterFunction<ServerResponse> routePostUpdate(){
+    public RouterFunction<ServerResponse> routePostUpdate() {
         return RouterFunctions.route()
                 .POST("/account", http())
                 .before(uri(userServiceAdress))
@@ -209,7 +212,7 @@ public class BFFConfig {
     }
 
     @Bean
-    public RouterFunction<ServerResponse> routeDeleteuser(){
+    public RouterFunction<ServerResponse> routeDeleteuser() {
         return route()
                 .DELETE("/delete", http())
                 .before(uri(userServiceAdress))
@@ -230,9 +233,6 @@ public class BFFConfig {
 //                .before(uri(userServiceAdress))
 //                .build();
 //    }
-
-
-
 
 
 }
