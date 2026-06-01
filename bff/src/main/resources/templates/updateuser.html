@@ -124,13 +124,24 @@
                 const errorData = await response.json();
                 const fieldErrors = errorData.error;
                 let errormessage ="";
-                for (const [field, message] of Object.entires(fieldErrors)){
-                    errormessage += '${field}: ${message}';
+                for (const key in fieldErrors) {
+                    if (fieldErrors.hasOwnProperty(key)) {
+                        const value = fieldErrors[key];
+
+                        if (typeof value === 'object' && value !== null) {
+                            errormessage += `${key}: ${JSON.stringify(value)}\n`;
+                        } else {
+                            errormessage += `${key}: ${value}\n`;
+                        }
+                    }
                 }
-                alert("Error saving account! Reason: " + errormessage);
+
+                    errormessage = JSON.stringify(errorData);
+
+                alert("Error saving account! Reason: "+ errormessage);
             }
         } catch (error) {
-            console.error("Failed: "+  error);
+            console.error("Failed: " + error);
         }
     }
 
