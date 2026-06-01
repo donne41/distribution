@@ -7,14 +7,19 @@ import example.service1.users.UserDto;
 import example.service1.users.UserEntity;
 import example.service1.services.UserService;
 import example.service1.users.UpdateUserDto;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 public class TestController {
@@ -62,12 +67,17 @@ public class TestController {
 //    }
 
     @PostMapping("/account")
-    public ResponseEntity<?> updateAccount(@RequestBody UpdateUserDto updateUser,
+    public ResponseEntity<?> updateAccount(@RequestBody @Valid UpdateUserDto updateUser,
+                                BindingResult result,
                                 @AuthenticationPrincipal Jwt jwt){
+        if(result.hasErrors()){
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
+                    .body(Map.of("error", result.getFieldError("username").getDefaultMessage()));
+        }
         try {
             userService.updateUser(updateUser, jwt);
         }catch (UsernameAlreadyExists e){
-            ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
                     .body(Map.of("error", e.getMessage()));
         }
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
@@ -80,7 +90,15 @@ public class TestController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> createNewAccount(@RequestBody CreateUserDto newUser){
+    public ResponseEntity<?> createNewAccount(@RequestBody @Valid CreateUserDto newUser,
+                                              BindingResult result){
+        if(result.hasErrors()){
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
+                    .body(Map.of("error", result.getFieldErrors().stream()
+                            .collect(Collectors.toMap(
+                                    FieldError::getField,
+                                    error -> error.getDefaultMessage()))));
+        }
         try {
             userService.saveUser(newUser);
         }catch (UsernameAlreadyExists e){

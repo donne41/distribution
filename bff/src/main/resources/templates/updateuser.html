@@ -79,9 +79,6 @@
 
         <button onclick="updateAccount()" class="btn-submit">Save update</button>
 
-        <p class="signup-link">
-            Already have an Account? <a th:href="@{/signin}">Sign in page</a>
-        </p>
 
     </div>
 
@@ -123,13 +120,17 @@
                 document.getElementById('username').value = "";
                 document.getElementById('password').value = "";
 
-                // Eller sätt en state som visar din gröna box/ruta
             } else {
                 const errorData = await response.json();
-                alert("Error saving account! Reason: ", errorData.error);
+                const fieldErrors = errorData.error;
+                let errormessage ="";
+                for (const [field, message] of Object.entires(fieldErrors)){
+                    errormessage += '${field}: ${message}';
+                }
+                alert("Error saving account! Reason: " + errormessage);
             }
         } catch (error) {
-            console.error("Failed: ", error);
+            console.error("Failed: "+  error);
         }
     }
 
@@ -147,10 +148,10 @@
                     alert("Your account has been deleted!");
                     document.getElementById("logoutform").submit();
                 }else {
-                    alert("Could not delete account! Status: ", response.status)
+                    alert("Could not delete account! Status: " + response.status)
                 }
             } catch (error) {
-                console.error("Error deleting user ", error)
+                console.error("Error deleting user "+ error)
             }
 
         }

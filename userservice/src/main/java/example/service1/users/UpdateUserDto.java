@@ -1,4 +1,8 @@
 package example.service1.users;
 
-public record UpdateUserDto(String username, String password) {
+import jakarta.validation.constraints.NotBlank;
+
+public record UpdateUserDto(
+        @NotBlank(message = "Username cannot be blank!")
+        String username, String password) {
 }
