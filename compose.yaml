@@ -79,7 +79,7 @@ services:
       - RABBITMQ_HOST=rabbitmq
       - MESSAGE_SERVICE_URL=http://messageservice:8082
 
-      - AI_API_BASE_URL=${AI_API_BASE_URL:-http://host.docker.internal:1234/v1}
+      - AI_API_BASE_URL=${AI_API_BASE_URL:-http://host.docker.internal:1234}
       - AI_API_MODEL_NAME=${AI_API_MODEL_NAME:-meta-llama-3.1-8b-instruct}
       - AI_API_KEY=${AI_API_KEY:-no-key-needed}
     extra_hosts:
@@ -114,6 +114,8 @@ services:
       - AUTH_HOST=authservice
       - USER_HOST=userservice
       - MESSAGE_HOST=messageservice
+
+
 
 volumes:
   postgres_data:
