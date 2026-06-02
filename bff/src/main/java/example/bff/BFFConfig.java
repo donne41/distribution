@@ -122,6 +122,7 @@ public class BFFConfig {
                 .build();
     }
 
+    @Bean
     public RouterFunction<ServerResponse> messageServiceRoute() {
         return route()
                 .route(request -> request.uri().getPath().startsWith("/api/messages"), http())
