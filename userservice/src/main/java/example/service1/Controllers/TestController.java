@@ -57,22 +57,14 @@ public class TestController {
             return new ResponseEntity<>("",HttpStatus.FOUND);
         }else return new ResponseEntity<>("", HttpStatus.NOT_FOUND);
     }
-//    @GetMapping("/account")
-//    public ResponseEntity<Void> getAccountPage(Model model,
-//                                 @AuthenticationPrincipal Jwt jwt){
-//        String jwtusername = jwt.getClaimAsString("sub");
-//
-//        System.out.println("Subject: "+ jwtusername);
-//        return ResponseEntity.ok()
-//    }
 
     @PostMapping("/account")
-    public ResponseEntity<?> updateAccount(@RequestBody @Valid UpdateUserDto updateUser,
+    public ResponseEntity<?> updateAccount(@RequestBody UpdateUserDto updateUser,
                                 BindingResult result,
                                 @AuthenticationPrincipal Jwt jwt){
-        if(result.hasErrors()){
+        if(updateUser.username().isBlank() && updateUser.password().isBlank()){
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
-                    .body(Map.of("error", result.getFieldError("username").getDefaultMessage()));
+                    .body(Map.of("error", "Nothing to update"));
         }
         try {
             userService.updateUser(updateUser, jwt);

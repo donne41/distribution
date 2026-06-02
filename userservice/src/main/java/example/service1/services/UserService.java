@@ -61,11 +61,13 @@ public class UserService {
     }
 
     public void updateUser(UpdateUserDto updateUser, Jwt jwt){
-        if(repository.existsByUserName(updateUser.username()))
-            throw new UsernameAlreadyExists("New username is already occupied!");
         var User = repository.findByUserName(jwt.getSubject());
-        User.setUserName(updateUser.username());
-        if(updateUser.password() != null) User.setPassword(mapper.encodePassword(updateUser.password()));
+        if(!updateUser.username().isBlank()) {
+            if (repository.existsByUserName(updateUser.username()))
+                throw new UsernameAlreadyExists("New username is already occupied!");
+            User.setUserName(updateUser.username());
+        }
+        if(!updateUser.password().isBlank()) User.setPassword(mapper.encodePassword(updateUser.password().trim()));
         repository.save(User);
     }
 
