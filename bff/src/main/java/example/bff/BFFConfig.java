@@ -112,7 +112,6 @@ public class BFFConfig {
     }
 
 
-    // Wildcard Route --> matches all HTTP methods (GET,POST...) in Message Service
     @Bean
     public RouterFunction<ServerResponse> routePostCreateNewuser() {
         return route()
@@ -122,6 +121,7 @@ public class BFFConfig {
                 .build();
     }
 
+    // Wildcard Route --> matches all HTTP methods (GET,POST...) in Message Service
     @Bean
     public RouterFunction<ServerResponse> messageServiceRoute() {
         return route()
@@ -136,7 +136,6 @@ public class BFFConfig {
 
     }
 
-    // Flytta till Authservice
     private LogoutSuccessHandler oidcLogoutSuccessHandler(ClientRegistrationRepository clientRegistrationRepository) {
         OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler =
                 new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository);
