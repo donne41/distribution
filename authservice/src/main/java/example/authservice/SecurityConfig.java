@@ -32,18 +32,14 @@ public class SecurityConfig {
 
         return username -> {
             try {
-                System.out.println("-- Trying RestClient -- ");
                 UserDto userDto = client
                         .get()
                         .uri("api/users/{username}", username)
                         .retrieve()
                         .body(UserDto.class);
                 if (userDto == null) {
-                    log.error("-- User returns null -- ");
                     throw new UsernameNotFoundException("Account did not exist");
                 }
-                log.info("-- Rest client has run, returning as userDetail -- ");
-                //UserEntity userDto = new UserEntity("demo", "pass");
                 return User.builder()
                         .username(userDto.username())
                         .password(userDto.password())
@@ -51,10 +47,10 @@ public class SecurityConfig {
                         .build();
             } catch (RestClientException e){
                 log.error("-- Failed to fetch user details --" + e.getMessage());
-                throw new RuntimeException("Error fetching user details " + e.getStackTrace());
+                throw new RuntimeException("Error fetching user details " + e.getMessage());
             }catch (Exception e) {
                 log.error("General expetion in userDetails service.");
-                throw new UsernameNotFoundException("Could not find account " + e.getStackTrace());
+                throw new UsernameNotFoundException("Could not find account " + e.getMessage());
             }
         };
     }

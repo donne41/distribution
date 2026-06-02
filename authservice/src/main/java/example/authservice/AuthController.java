@@ -10,12 +10,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Controller
 public class AuthController {
 
-    public AuthController(AuthService service){
-        this.service = service;
-    }
-
-    private AuthService service;
-
     @Value("${bff.service.address}")
     private String bffAddress;
 
@@ -26,7 +20,6 @@ public class AuthController {
 
     @GetMapping("/signup")
     public String signUpPage(){
-        System.out.println("-- Redirecting from controller -- ");
         return "redirect:" + bffAddress + "/signup";
     }
 
