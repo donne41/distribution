@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta th:name="_csrf" th:content="${_csrf.token}"/>
+    <meta th:name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>New user</title>
+
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* The login page has no nav, so .auth-body centres the card. */
+        .container {
+            max-width: 420px;
+            width: 100%;
+        }
+
+        .container > header {
+            text-align: center;
+            display: block;          /* override the flex default */
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+        }
+        .container > header p { color: var(--color-text-dim); font-size: 14px; margin-top: 5px; }
+
+        .alert-success {
+            background: rgba(30, 126, 52, 0.15);
+            border: 1px solid rgba(30, 126, 52, 0.3);
+            color: #81c995;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body class="auth-body">
+
+<div class="container">
+    <header>
+        <h1>Sign Up</h1>
+
+    </header>
+
+    <div th:if="${param.error}" class="alert-error">
+        Invalid username or password.
+    </div>
+
+    <div th:if="${param.logout}" class="alert-success">
+        You have been signed out.
+    </div>
+
+    <div class="container">
+
+
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input id="username" placeholder="Enter your username" required autofocus>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input id="password" type="password" placeholder="Enter your password" required>
+        </div>
+
+        <button onclick="saveUser()" class="btn-submit">Sign Up</button>
+
+        <p class="signup-link">
+            Already have an Account? <a th:href="@{/signin}">Sign in page</a>
+        </p>
+
+    </div>
+
+</div>
+<script>
+    async function getRequestHeader() {
+        const tokenMeta = document.querySelector("meta[name='_csrf']");
+        const headerMeta = document.querySelector("meta[name='_csrf_header']");
+
+        const token = tokenMeta ? tokenMeta.getAttribute("content") : null;
+        const header = headerMeta ? headerMeta.getAttribute("content") : null;
+
+        const requestHeaders = {
+            'Content-Type': 'application/json'
+        };
+        if (token && header) {
+            requestHeaders[header] = token;
+        }
+        return requestHeaders;
+    }
+    async function saveUser() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        const requestHeaders = await getRequestHeader()
+
+        try {
+            const response = await fetch('/signup', {
+                method: 'POST',
+                headers: requestHeaders,
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            });
+            if(response.ok){
+                window.location.href= "/"
+            }else {
+                const errorData = await response.json();
+                let errormessage ="";
+                for (const key in errorData) {
+                    if (errorData.hasOwnProperty(key)) {
+                        const value = errorData[key];
+
+                        if (typeof value === 'object' && value !== null) {
+                            errormessage += `${key}: ${JSON.stringify(value)}\n`;
+                        } else {
+                            errormessage += `${key}: ${value}\n`;
+                        }
+                    }
+                }
+
+                alert("account not created!\n" + errormessage);
+            }
+        }catch(error) {
+            console.error("Error creating user!"+ error);
+        }
+    }
+</script>
+</body>
+</html>

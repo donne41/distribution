@@ -2,13 +2,12 @@ package example.service1.users;
 
 import jakarta.validation.constraints.NotBlank;
 
-import java.util.List;
-
-public record UserDto(
+public record CreateUserDto(
         @NotBlank
         String username,
         @NotBlank
-        String password,
-        List<String> roles,
-        Long id
-){}
+        String password) {
+    public CreateUserDto(){
+        this(null, null);
+    }
+}

@@ -3,6 +3,7 @@ package example.service1.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,22 +14,31 @@ public class UserConfiguration {
 
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http){
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http
                 .csrf(
                         csrf -> csrf.disable()
                 )
                 .authorizeHttpRequests(
                         auth -> auth
-                                .requestMatchers(HttpMethod.GET, "/api/users/**", "/error", "/api/test")
+                                .requestMatchers(HttpMethod.GET, "/api/users/**", "/error", "/get/**", "/css/**", "/static/**")
                                 .permitAll()
+                                .requestMatchers("/signup").permitAll()
+                                //.requestMatchers("/find/**").hasRole("SYSTEM")
                                 .anyRequest().authenticated()
+                )
+                // read token relay
+                .oauth2ResourceServer(oauth -> oauth.jwt(
+                        Customizer.withDefaults()))
+                .httpBasic(Customizer.withDefaults()
                 );
         return http.build();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+
 }

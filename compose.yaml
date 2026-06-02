@@ -45,7 +45,7 @@ services:
       - DB_HOST=postgres
       - AUTH_HOST=authservice
       - SPRING.RABBITMQ.HOST=rabbitmq
-
+      - BFF_HOST=bff
   messageservice:
     build: ./messageservice
     ports:
@@ -63,6 +63,8 @@ services:
       - RABBITMQ_HOST=rabbitmq
       - USER_SERVICE_GRPC_HOST=userservice
       - USER_SERVICE_GRPC_PORT=9090
+      - SPRING.RABBITMQ.HOST=rabbitmq
+      - GRPC_HOST=userservice
 
   botservice:
     build: ./botservice
@@ -94,6 +96,7 @@ services:
     environment:
       - AUTH_PUB_HOST=authservice
       - USER_HOST=userservice
+      - BFF_HOST=bff
     healthcheck:
       test: [ "CMD", "nc", "-z", "authservice", "9000" ]
       interval: 5s
@@ -110,6 +113,7 @@ services:
     environment:
       - AUTH_HOST=authservice
       - USER_HOST=userservice
+      - MESSAGE_HOST=messageservice
 
 volumes:
   postgres_data:
