@@ -106,6 +106,7 @@
                 alert("Uppdateringen lyckades!");
                 document.getElementById('username').value = "";
                 document.getElementById('password').value = "";
+                window.location.href= "/";
 
             } else {
                 const errorData = await response.json();

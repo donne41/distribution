@@ -21,6 +21,8 @@ public class RestClientConfig {
     public RestClient aiRestClient(@Value("${ai.api.base-url}") String baseUrl,
                                  @Value("${ai.api.key}") String apiKey) {
 
+        System.out.println("BASE URL: " + baseUrl);
+        System.out.println("API KEY: " + apiKey);
         ConnectionConfig connectionConfig = ConnectionConfig.custom()
                 .setConnectTimeout(Timeout.ofSeconds(10)) // connect timeout for AI API
                 .build();

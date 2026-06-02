@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -140,6 +141,16 @@ public class BFFConfig {
         OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler =
                 new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository);
         oidcLogoutSuccessHandler.setPostLogoutRedirectUri("{baseUrl}/");
+
+        oidcLogoutSuccessHandler.setRedirectStrategy(new DefaultRedirectStrategy() {
+            @Override
+            public void sendRedirect(HttpServletRequest request, HttpServletResponse response, String url) throws IOException {
+                String fixedUrl = url.replace("http://authservice:9000", "http://127.0.0.1:9000");
+                LOG.debug("BEFORE REPLACE URL: " + url);
+                LOG.debug("AFTER REPLACE: "+ fixedUrl);
+                super.sendRedirect(request, response, fixedUrl);
+            }
+        });
         return oidcLogoutSuccessHandler;
 
     }

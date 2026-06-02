@@ -1,5 +1,6 @@
 package com.chatting.service3.consumer;
 
+import com.chatting.service3.config.RestClientConfig;
 import com.chatting.service3.dto.ChatCompletionRequest;
 import com.chatting.service3.dto.ChatCompletionResponse;
 import com.chatting.service3.dto.MessageCreatedEvent;
@@ -33,7 +34,6 @@ private final String modelName;
     @RabbitListener(queues = "message-published")
     public void consumeMessage(MessageCreatedEvent event) {
         log.info("Ai-Bot received a message from: {}", event.username());
-
         // Make sure the bot don´t answer its´own messages
         if ("ai-bot".equals(event.username())) {
             return;
@@ -63,7 +63,6 @@ private final String modelName;
         try {
             // Sends Post-call to chat/completions
             ChatCompletionResponse response = aiRestClient.post()
-                    .uri("/chat/completions")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(requestPayload)
                     .retrieve()
