@@ -71,21 +71,21 @@
 
 
 <script>
-    // async function getRequestHeader() {
-    //     const tokenMeta = document.querySelector("meta[name='_csrf']");
-    //     const headerMeta = document.querySelector("meta[name='_csrf_header']");
-    //
-    //     const token = tokenMeta ? tokenMeta.getAttribute("content") : null;
-    //     const header = headerMeta ? headerMeta.getAttribute("content") : null;
-    //
-    //     const requestHeaders = {
-    //         'Content-Type': 'application/json'
-    //     };
-    //     if (token && header) {
-    //         requestHeaders[header] = token;
-    //     }
-    //     return requestHeaders;
-    // }
+    async function getRequestHeader() {
+        const tokenMeta = document.querySelector("meta[name='_csrf']");
+        const headerMeta = document.querySelector("meta[name='_csrf_header']");
+
+        const token = tokenMeta ? tokenMeta.getAttribute("content") : null;
+        const header = headerMeta ? headerMeta.getAttribute("content") : null;
+
+        const requestHeaders = {
+            'Content-Type': 'application/json'
+        };
+        if (token && header) {
+            requestHeaders[header] = token;
+        }
+        return requestHeaders;
+    }
 
     async function updateAccount() {
         const username = document.getElementById('username').value;
