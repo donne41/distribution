@@ -38,6 +38,7 @@ import java.util.stream.Stream;
 import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.*;
 import static org.springframework.cloud.gateway.server.mvc.filter.FilterFunctions.redirectTo;
 import static org.springframework.cloud.gateway.server.mvc.filter.FilterFunctions.stripPrefix;
+import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.uri;
 import static org.springframework.cloud.gateway.server.mvc.filter.TokenRelayFilterFunctions.tokenRelay;
 import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions.http;
 import static org.springframework.cloud.gateway.server.mvc.handler.GatewayRouterFunctions.route;
@@ -129,6 +130,7 @@ public class BFFConfig {
                     LOG.info("Incoming {} request to Message Service", request.method());
                     return request;
                 })
+                .filter(tokenRelay())
                 .build();
 
     }
@@ -219,20 +221,4 @@ public class BFFConfig {
                 .filter(tokenRelay())
                 .build();
     }
-
-//    @Bean
-//    public RouterFunction<ServerResponse> routeToSaveUpdate(){
-//        return route()
-//                .POST("/account", http())
-//                .before(request -> {
-//                    String token = request.cookies().getFirst("XSRF_TOKEN").getValue();
-//                    LOG.debug("CSRF TOKEN: "+ token);
-//                    return request;
-//                })
-//                .filter(tokenRelay())
-//                .before(uri(userServiceAdress))
-//                .build();
-//    }
-
-
 }
