@@ -6,12 +6,13 @@ import example.service1.users.CreateUserDto;
 import example.service1.users.UserDto;
 import example.service1.users.UserEntity;
 import example.service1.users.UpdateUserDto;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
+@Slf4j
 @Service
 public class UserService {
 
@@ -62,6 +63,10 @@ public class UserService {
 
     public void updateUser(UpdateUserDto updateUser, Jwt jwt){
         var User = repository.findByUserName(jwt.getSubject());
+        if(User == null){
+            log.debug("Error finding username with token, subject: " + jwt.getSubject());
+            throw new RuntimeException("Username not found in token.");
+        }
         if(!updateUser.username().isBlank()) {
             if (repository.existsByUserName(updateUser.username()))
                 throw new UsernameAlreadyExists("New username is already occupied!");
