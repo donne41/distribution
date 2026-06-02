@@ -3,12 +3,14 @@
     --color-surface:           #111;
     --color-input-bg:          #181818;
     --color-border:            #222;
+    --glass-border: rgba(255, 255, 255, 0.05);
     --color-border-focus:      #666;
     --color-text-primary:      #fff;
     --color-text-secondary:    #ccc;
     --color-text-muted:        #888;
     --color-text-dim:          #666;
     --color-accent:            #fff;
+    --accent-color: #8d81f8;
     --color-accent-hover:      #ccc;
     --color-accent-on:         #000;
     --color-alert-error-bg:    rgba(217, 48, 37, 0.15);
@@ -19,7 +21,7 @@
     --color-alert-success-fg:  #81c995;
     --font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     --radius-sm:   8px;
-    --radius-md:   12px;
+    --radius-md:   24px;
     --shadow-card: 0 8px 16px -2px rgba(0, 0, 0, 0.6);
 }
 
@@ -29,17 +31,17 @@ body.auth-body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: var(--color-bg);
+    background-color: #05070a;
     color: var(--color-text-primary);
     font-family: var(--font-system);
     margin: 0;
 }
 
 .container {
-    background-color: var(--color-surface);
+    background: rgba(255, 255, 255, 0.02);
     padding: 32px;
     border-radius: var(--radius-md);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--glass-border);
     box-shadow: var(--shadow-card);
     width: 100%;
     max-width: 420px;
@@ -53,26 +55,28 @@ header {
 header p { color: var(--color-text-dim); font-size: 14px; margin-top: 5px; }
 
 .form-group { margin-bottom: 20px; }
-.form-group label { display: block; margin-bottom: 8px; font-size: 14px; color: var(--color-text-secondary); }
+.form-group label { display: block; margin-bottom: 8px; font-size: 16px; color: var(--accent-color); }
 .form-group input {
     width: 100%;
     padding: 12px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--color-border);
-    background-color: var(--color-input-bg);
+    background: rgba(255, 255, 255, 0.04);
     color: var(--color-text-primary);
     box-sizing: border-box;
+    font-size: 14px;
 }
 
 .btn-submit {
     width: 100%;
     padding: 12px;
-    background-color: var(--color-accent);
+    background-color: var(--accent-color);
     color: var(--color-accent-on);
     border: none;
     border-radius: var(--radius-sm);
     font-weight: bold;
     cursor: pointer;
+    font-size: 14px;
 }
 
 .oauth2-btn {
