@@ -32,8 +32,8 @@ public class MessageController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<ReceiveMessageDTO>> getAllMessages(@AuthenticationPrincipal Jwt jwt){
-        List<ReceiveMessageDTO> receiveMessage = messageService.getAllMessages(jwt);
+    public ResponseEntity<List<ReceiveMessageDTO>> getAllMessages(){
+        List<ReceiveMessageDTO> receiveMessage = messageService.getAllMessages();
         return ResponseEntity.ok(receiveMessage);
     }
 }

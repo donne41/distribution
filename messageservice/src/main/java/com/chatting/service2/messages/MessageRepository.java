@@ -8,7 +8,7 @@ import java.util.List;
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
-    List<Message> findAllByUsernameOrderByCreatedAtAsc(String username);
+    List<Message> findAllByOrderByCreatedAtAsc();
 
 
 

@@ -25,9 +25,7 @@ import org.springframework.web.servlet.function.ServerResponse;
 
 import java.io.IOException;
 
-import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.setPath;
 import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.uri;
-import static org.springframework.cloud.gateway.server.mvc.filter.FilterFunctions.stripPrefix;
 import static org.springframework.cloud.gateway.server.mvc.filter.TokenRelayFilterFunctions.tokenRelay;
 import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions.http;
 import static org.springframework.cloud.gateway.server.mvc.handler.GatewayRouterFunctions.route;
@@ -111,7 +109,6 @@ public class BFFConfig {
     }
 
 
-
     // Wildcard Route --> matches all HTTP methods (GET,POST...) in Message Service
     @Bean
     public RouterFunction<ServerResponse> messageServiceRoute() {
@@ -126,66 +123,6 @@ public class BFFConfig {
                 .build();
     }
 
-
-
-    @Bean
-    public RouterFunction<ServerResponse> route3() {
-        // /api/test3 -> localhost:8083
-
-        return route()
-                .GET("/api/test3", http())
-                .before(request -> {
-                    LOG.info("Incoming request for route 3 to port 8083");
-                    return request;
-                })
-                .before(uri("http://localhost:8083"))
-                .before(setPath("/api/test"))
-                .filter(tokenRelay())
-                .build();
-    }
-
-    @Bean
-    public RouterFunction<ServerResponse> routeToChat() {
-
-        return route()
-                .GET("/api/chat/**", http())
-                .before(request -> {
-                    LOG.info("Request to ChatAi: {}", request.uri().getPath());
-                    return request;
-                })
-                .before(uri("http://localhost:8090"))
-                .filter(stripPrefix(2))
-                .filter(tokenRelay())
-                .build();
-    }
-
-    @Bean
-    public RouterFunction<ServerResponse> routeConfigurationForChat() {
-
-        return route()
-                .GET("/chatup/**", http())
-                .before(request -> {
-                    LOG.info("Request to api");
-                    return request;
-                })
-                .before(uri("http://localhost:8090"))
-                .filter(tokenRelay())
-                .build();
-    }
-
-    @Bean
-    public RouterFunction<ServerResponse> routeForPostChat() {
-
-        return route()
-                .POST("/api/v1/chat", http())
-                .before(request -> {
-                    LOG.info("Post from chat ai {}", request.uri().getPath());
-                    return request;
-                })
-                .before(uri("http://localhost:8090"))
-                .filter(tokenRelay())
-                .build();
-    }
 
     @Bean
     public RouterFunction<ServerResponse> routeToDashBoard() {
