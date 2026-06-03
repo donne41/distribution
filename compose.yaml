@@ -96,7 +96,6 @@ services:
     environment:
       - AUTH_PUB_HOST=authservice
       - USER_HOST=userservice
-      - BFF_HOST=bff
     healthcheck:
       test: [ "CMD", "nc", "-z", "authservice", "9000" ]
       interval: 5s
