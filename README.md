@@ -7,6 +7,7 @@
 - [Description](#description)
 - [Tech Stack](#tech-stack)
 - [Quick Start](#quick-start)
+- [Screenshots](#screenshots)
 - [Key Dependencies](#key-dependencies)
 - [Project Structure](#project-structure)
 - [Development Setup](#development-setup)
