@@ -2,12 +2,15 @@
 
 ![GitHub stars](https://img.shields.io/github/stars/donne41/distribution?style=for-the-badge&logo=github) ![GitHub forks](https://img.shields.io/github/forks/donne41/distribution?style=for-the-badge&logo=github) ![GitHub issues](https://img.shields.io/github/issues/donne41/distribution?style=for-the-badge&logo=github) ![Last commit](https://img.shields.io/github/last-commit/donne41/distribution?style=for-the-badge&logo=github) ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white) ![Java (Maven)](https://img.shields.io/badge/Java%20(Maven)-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
 
+## Screenshot
+
+![Chat example](/screenshots/chatExampleMicrochat.jpg?raw=true "Chat window")
+
 ## 📑 Table of Contents
 
 - [Description](#description)
 - [Tech Stack](#tech-stack)
 - [Quick Start](#quick-start)
-- [Screenshots](#screenshots)
 - [Key Dependencies](#key-dependencies)
 - [Project Structure](#project-structure)
 - [Development Setup](#development-setup)
@@ -39,12 +42,6 @@ run the docker compose file with docker compose up --build -d
 
 4. Start chatting
 ```
-
-## Screenshots
-
-![Login page](/screenshots/LoginPageMicrochat.jpg?raw=true "Login Page")
-
-![Chat example](/screenshots/chatExampleMicrochat.jpg?raw=true "Chat window")
 
 ## 📦 Key Dependencies
 
