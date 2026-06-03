@@ -39,6 +39,12 @@ run the docker compose file with docker compose up --build -d
 4. Start chatting
 ```
 
+## Screenshots
+
+![Login page](/screenshots/LoginPageMicrochat.jpg?raw=true "Login Page")
+
+![Chat example](/screenshots/chatExampleMicrochat.jpg?raw=true "Chat window")
+
 ## 📦 Key Dependencies
 
 ```
